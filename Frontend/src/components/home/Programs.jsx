@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { FaArrowRight, FaClock, FaSignal } from 'react-icons/fa'
 import { useSiteContent } from '../../context/SiteContentContext'
+import { fadeInUp, staggerContainer, staggerItem, viewportConfig, cardHover, buttonSpring } from '../../utils/animations'
 
 const PROGRAMS_DEFAULTS = {
   sectionTag: 'Our Programs',
@@ -30,7 +31,12 @@ export default function Programs() {
 
         {/* Header row */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+          >
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
               <div className="w-1.5 h-1.5 bg-primary rounded-full" />
               <span className="text-primary text-xs font-bold uppercase tracking-widest">{c.sectionTag}</span>
@@ -40,9 +46,15 @@ export default function Programs() {
               <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{c.headingHighlight}</span>
             </h2>
           </motion.div>
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+          >
             <Link to="/workouts">
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              <motion.button
+                {...buttonSpring}
                 className="flex items-center gap-2 border border-primary/30 hover:border-primary text-primary hover:text-white hover:bg-primary font-bold px-6 py-3 rounded-xl transition-all duration-300 text-sm whitespace-nowrap">
                 View All Programs <FaArrowRight className="text-xs" />
               </motion.button>
@@ -51,13 +63,17 @@ export default function Programs() {
         </div>
 
         {/* Programs grid — first card is large (featured) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          viewport={viewportConfig}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
           {c.programs.map((p, i) => (
-            <motion.div key={i}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
+            <motion.div
+              key={i}
+              variants={staggerItem}
               className="group relative rounded-2xl overflow-hidden cursor-pointer">
 
               {/* Image */}
@@ -104,7 +120,7 @@ export default function Programs() {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

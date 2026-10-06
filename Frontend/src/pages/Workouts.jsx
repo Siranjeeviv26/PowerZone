@@ -4,6 +4,7 @@ import { FaClock, FaFire, FaUsers, FaDumbbell, FaSignal } from 'react-icons/fa'
 import PageHero from '../components/shared/PageHero'
 import api from '../utils/api'
 import { useSiteContent } from '../context/SiteContentContext'
+import { fadeInUp, staggerContainer, staggerItem, viewportConfig, cardHover, buttonSpring } from '../utils/animations'
 
 const WORKOUTS_DEFAULTS = {
   heroBadge: 'Training Programs',
@@ -36,9 +37,18 @@ export default function Workouts() {
       <section className="py-24 px-4 md:px-8 lg:px-16 bg-dark">
         <div className="max-w-7xl mx-auto">
           {/* Filters */}
-          <div className="flex flex-wrap gap-2 justify-center mb-12">
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+            className="flex flex-wrap gap-2 justify-center mb-12"
+          >
             {categories.map((cat) => (
-              <motion.button key={cat} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={() => setActive(cat)}
+              <motion.button
+                key={cat}
+                {...buttonSpring}
+                onClick={() => setActive(cat)}
                 className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
                   active === cat
                     ? 'bg-primary text-white shadow-lg shadow-primary/25'
@@ -47,7 +57,7 @@ export default function Workouts() {
                 {cat}
               </motion.button>
             ))}
-          </div>
+          </motion.div>
 
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -68,11 +78,19 @@ export default function Workouts() {
               <p className="text-gray-400 text-lg">{workouts.length === 0 ? 'No workout programs available yet.' : `No ${active} workouts found.`}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              viewport={viewportConfig}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+            >
               {filtered.map((workout, i) => (
-                <motion.div key={workout._id} layout
-                  initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: i * 0.05 }}
+                <motion.div
+                  key={workout._id}
+                  layout
+                  variants={staggerItem}
+                  whileHover={cardHover.hover}
                   className="group relative rounded-2xl overflow-hidden bg-dark-200 border border-dark-400 hover:border-primary/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10 cursor-pointer">
                   <div className="relative overflow-hidden h-52">
                     <img src={workout.image || 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80'} alt={workout.title}
@@ -103,7 +121,7 @@ export default function Workouts() {
                   </div>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>

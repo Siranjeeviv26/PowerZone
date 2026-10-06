@@ -5,6 +5,7 @@ import { FaDumbbell, FaEnvelope, FaArrowLeft, FaCheckCircle } from 'react-icons/
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 import { useSiteContent } from '../context/SiteContentContext'
+import { fadeInUp, floatAnimation, floatAnimationSlow, buttonSpring, staggerContainer, staggerItem, viewportConfig } from '../utils/animations'
 
 const FORGOT_DEFAULTS = {
   bgImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&q=80',
@@ -47,47 +48,84 @@ export default function ForgotPassword() {
           <img src={c.bgImage} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-br from-dark/95 via-dark/80 to-primary/20" />
         </div>
-        <div className="relative z-10">
+
+        {/* Decorative floating elements */}
+        <motion.div animate={floatAnimation.animate} className="absolute top-20 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <motion.div animate={floatAnimationSlow.animate} className="absolute bottom-20 right-10 w-48 h-48 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
+
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="relative z-10"
+        >
           <Link to="/" className="inline-flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center"
+            >
               <FaDumbbell className="text-white text-base" />
-            </div>
+            </motion.div>
             <span className="text-xl font-black text-white" style={{ fontFamily: 'Oswald' }}>
               POWER<span className="text-primary">ZONE</span>
             </span>
           </Link>
-        </div>
-        <div className="relative z-10 space-y-6">
-          <h1 className="text-5xl font-black text-white leading-tight" style={{ fontFamily: 'Oswald' }}>
-            {c.headline1}<br />
-            <span className="text-primary">{c.headline2}</span>
-          </h1>
-          <p className="text-gray-300 text-lg max-w-sm leading-relaxed">{c.subtitle}</p>
-        </div>
-        <div className="relative z-10">
-          <blockquote className="border-l-2 border-primary pl-4">
-            <p className="text-gray-300 text-sm italic">{c.quote}</p>
-          </blockquote>
-        </div>
+        </motion.div>
+
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          viewport={viewportConfig}
+          className="relative z-10 space-y-8"
+        >
+          <motion.div variants={staggerItem}>
+            <h1 className="text-5xl font-black text-white leading-tight" style={{ fontFamily: 'Oswald' }}>
+              {c.headline1}<br />
+              <span className="text-primary">{c.headline2}</span>
+            </h1>
+            <p className="text-gray-300 text-lg max-w-sm leading-relaxed">{c.subtitle}</p>
+          </motion.div>
+
+          <motion.div variants={staggerItem}>
+            <blockquote className="border-l-2 border-primary pl-4">
+              <p className="text-gray-300 text-sm italic">{c.quote}</p>
+            </blockquote>
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* RIGHT PANEL */}
       <div className="flex-1 flex flex-col justify-center bg-dark relative overflow-y-auto">
-        <div className="lg:hidden px-8 pt-8 pb-4">
+        {/* Decorative floating elements for form side */}
+        <motion.div animate={floatAnimation.animate} className="absolute top-20 right-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <motion.div animate={floatAnimationSlow.animate} className="absolute bottom-20 left-10 w-48 h-48 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
+
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="lg:hidden px-8 pt-8 pb-4"
+        >
           <Link to="/" className="inline-flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center"
+            >
               <FaDumbbell className="text-white text-sm" />
-            </div>
+            </motion.div>
             <span className="text-lg font-black text-white" style={{ fontFamily: 'Oswald' }}>
               POWER<span className="text-primary">ZONE</span>
             </span>
           </Link>
-        </div>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
           className="px-8 md:px-16 py-10 max-w-md mx-auto w-full"
         >
           {sent ? (
@@ -120,26 +158,37 @@ export default function ForgotPassword() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-                <div>
-                  <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Email Address</label>
-                  <div className="relative">
-                    <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => { setEmail(e.target.value); setError('') }}
-                      placeholder="your@email.com"
-                      className={`input-field pl-11 ${error ? 'border-red-500 focus:border-red-500' : ''}`}
-                    />
-                  </div>
-                  {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
-                </div>
+                <motion.div
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                  viewport={viewportConfig}
+                >
+                  <motion.div
+                    variants={staggerItem}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Email Address</label>
+                    <div className="relative">
+                      <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => { setEmail(e.target.value); setError('') }}
+                        placeholder="your@email.com"
+                        className={`input-field pl-11 ${error ? 'border-red-500 focus:border-red-500' : ''}`}
+                      />
+                    </div>
+                    {error && <p className="text-red-400 text-xs mt-1">{error}</p>}
+                  </motion.div>
+                </motion.div>
 
                 <motion.button
                   type="submit"
                   disabled={loading}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  {...buttonSpring}
                   className="w-full btn-primary py-3.5 text-sm disabled:opacity-60"
                 >
                   {loading ? (

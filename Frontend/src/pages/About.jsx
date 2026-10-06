@@ -5,6 +5,7 @@ import StatsCounter from '../components/home/StatsCounter'
 import CallToAction from '../components/home/CallToAction'
 import PageHero from '../components/shared/PageHero'
 import { useSiteContent } from '../context/SiteContentContext'
+import { fadeInUp, staggerContainer, staggerItem, viewportConfig, cardHover } from '../utils/animations'
 
 const VALUE_ICONS = [FaTrophy, FaHeart, FaUsers, FaDumbbell]
 
@@ -97,7 +98,13 @@ export default function About() {
       {/* Values */}
       <section className="py-24 px-4 md:px-8 lg:px-16 bg-dark">
         <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex gap-6 items-start mb-14">
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+            className="flex gap-6 items-start mb-14"
+          >
             <div className="w-1 self-stretch bg-gradient-to-b from-primary to-transparent rounded-full flex-shrink-0 min-h-[70px]" />
             <div>
               <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-3">
@@ -109,13 +116,21 @@ export default function About() {
               </h2>
             </div>
           </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <motion.div
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+            viewport={viewportConfig}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+          >
             {c.values.map((v, i) => {
               const Icon = VALUE_ICONS[i]
               return (
-              <motion.div key={i} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group relative overflow-hidden rounded-2xl border border-dark-400 hover:border-primary/30 p-6 text-center cursor-default transition-all duration-300 hover:-translate-y-2"
+              <motion.div
+                key={i}
+                variants={staggerItem}
+                whileHover={cardHover.hover}
+                className="group relative overflow-hidden rounded-2xl border border-dark-400 hover:border-primary/30 p-6 text-center cursor-default transition-all duration-300"
                 style={{ background: `linear-gradient(135deg, ${v.color}06 0%, #0a0a0a 60%)` }}>
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300"
                   style={{ backgroundColor: `${v.color}18`, border: `1px solid ${v.color}30` }}>
@@ -126,14 +141,20 @@ export default function About() {
               </motion.div>
               )
             })}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Timeline */}
       <section className="py-24 px-4 md:px-8 lg:px-16 bg-dark-100">
         <div className="max-w-4xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+            className="text-center mb-14"
+          >
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
               <div className="w-1.5 h-1.5 bg-primary rounded-full" />
               <span className="text-primary text-xs font-bold uppercase tracking-widest">Our Journey</span>
@@ -145,22 +166,31 @@ export default function About() {
           <div className="relative">
             {/* Line: left-aligned on mobile, centered on lg */}
             <div className="absolute left-4 lg:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-primary via-secondary to-primary lg:-translate-x-1/2" />
-            {c.milestones.map((m, i) => (
-              <motion.div key={i} initial={{ opacity: 0, x: i % 2 === 0 ? -50 : 50 }} whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }} transition={{ duration: 0.6, delay: i * 0.1 }}
-                className={`relative flex items-center mb-10 ${i % 2 === 0 ? 'lg:flex-row-reverse' : ''}`}>
-                {/* Card: full width on mobile, 5/12 on lg */}
-                <div className={`w-full pl-10 lg:w-5/12 lg:pl-0 ${i % 2 === 0 ? 'lg:text-right lg:pr-8' : 'lg:pl-8'}`}>
-                  <div className="bg-dark-200 border border-dark-400 hover:border-primary/30 rounded-2xl p-5 transition-all duration-300">
-                    <div className="text-primary font-black text-2xl mb-1" style={{ fontFamily: 'Oswald' }}>{m.year}</div>
-                    <div className="text-white font-bold text-sm mb-1">{m.title}</div>
-                    <div className="text-gray-400 text-xs leading-relaxed">{m.desc}</div>
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              viewport={viewportConfig}
+            >
+              {c.milestones.map((m, i) => (
+                <motion.div
+                  key={i}
+                  variants={staggerItem}
+                  className={`relative flex items-center mb-10 ${i % 2 === 0 ? 'lg:flex-row-reverse' : ''}`}
+                >
+                  {/* Card: full width on mobile, 5/12 on lg */}
+                  <div className={`w-full pl-10 lg:w-5/12 lg:pl-0 ${i % 2 === 0 ? 'lg:text-right lg:pr-8' : 'lg:pl-8'}`}>
+                    <div className="bg-dark-200 border border-dark-400 hover:border-primary/30 rounded-2xl p-5 transition-all duration-300">
+                      <div className="text-primary font-black text-2xl mb-1" style={{ fontFamily: 'Oswald' }}>{m.year}</div>
+                      <div className="text-white font-bold text-sm mb-1">{m.title}</div>
+                      <div className="text-gray-400 text-xs leading-relaxed">{m.desc}</div>
+                    </div>
                   </div>
-                </div>
-                {/* Dot: left on mobile, center on lg */}
-                <div className="absolute left-4 lg:left-1/2 -translate-x-1/2 w-5 h-5 bg-primary rounded-full border-4 border-dark-100 z-10 shadow-lg shadow-primary/30" />
-              </motion.div>
-            ))}
+                  {/* Dot: left on mobile, center on lg */}
+                  <div className="absolute left-4 lg:left-1/2 -translate-x-1/2 w-5 h-5 bg-primary rounded-full border-4 border-dark-100 z-10 shadow-lg shadow-primary/30" />
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </div>
       </section>

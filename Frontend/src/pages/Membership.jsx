@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { FaCheck, FaCrown, FaBolt, FaStar, FaChevronDown, FaTag, FaTimes } from 'react-icons/fa'
 import PageHero from '../components/shared/PageHero'
+import PaymentModal from '../components/shared/PaymentModal'
 import api from '../utils/api'
 import { useSiteContent } from '../context/SiteContentContext'
+import { fadeInUp, staggerContainer, staggerItem, cardHover, easings, viewportConfig, modalVariant, accordionContent } from '../utils/animations'
 
 const MEMBERSHIP_DEFAULTS = {
   heroBadge: 'Pricing Plans',
@@ -29,7 +32,7 @@ const BILLING_OPTIONS = [
   { value: 'yearly',      label: 'Yearly',      short: 'yr',  months: 12, key: 'yearlyPrice',      saveBadge: 'Save 17%' },
 ]
 
-function PlanCard({ plan, billing, index }) {
+function PlanCard({ plan, billing, index, onBuy }) {
   const Icon = ICON_MAP[index % ICON_MAP.length]
   const color = plan.color || '#e63946'
   const opt = BILLING_OPTIONS.find((b) => b.value === billing) || BILLING_OPTIONS[0]
@@ -38,9 +41,12 @@ function PlanCard({ plan, billing, index }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.1 }}
-      className={`relative rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-2 ${
+      variants={staggerItem}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      whileHover={cardHover.hover}
+      className={`relative rounded-2xl overflow-hidden transition-all duration-300 ${
         plan.isPopular ? 'border-2 shadow-2xl' : 'bg-dark-200 border border-dark-400 hover:border-primary/30'
       }`}
       style={plan.isPopular ? { borderColor: color, boxShadow: `0 25px 50px ${color}20`, background: `linear-gradient(160deg, ${color}08 0%, #1a1a1a 50%)` } : {}}
@@ -96,15 +102,15 @@ function PlanCard({ plan, billing, index }) {
           ))}
         </ul>
 
-        <Link to="/register">
-          <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-            className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all duration-300 ${
-              plan.isPopular ? 'text-white shadow-lg' : 'border border-dark-500 hover:border-primary text-gray-300 hover:text-white hover:bg-primary/10'
-            }`}
-            style={plan.isPopular ? { backgroundColor: color } : {}}>
-            Get Started — {plan.name}
-          </motion.button>
-        </Link>
+        <motion.button
+          whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+          onClick={onBuy}
+          className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all duration-300 ${
+            plan.isPopular ? 'text-white shadow-lg' : 'border border-dark-500 hover:border-primary text-gray-300 hover:text-white hover:bg-primary/10'
+          }`}
+          style={plan.isPopular ? { backgroundColor: color } : {}}>
+          Get Started — {plan.name}
+        </motion.button>
       </div>
     </motion.div>
   )
@@ -116,12 +122,15 @@ export default function Membership() {
     ...MEMBERSHIP_DEFAULTS, ...saved,
     faqs: saved.faqs?.length ? saved.faqs : MEMBERSHIP_DEFAULTS.faqs,
   } : MEMBERSHIP_DEFAULTS
+  const { user } = useSelector((s) => s.auth)
+  const navigate = useNavigate()
   const [billing, setBilling] = useState('monthly')
   const [openFaq, setOpenFaq] = useState(null)
   const [plans, setPlans] = useState([])
   const [loading, setLoading] = useState(true)
   const [offers, setOffers] = useState([])
   const [offerLightbox, setOfferLightbox] = useState(null)
+  const [payModal, setPayModal] = useState(null)
 
   useEffect(() => {
     api.get('/plans').then(({ data }) => setPlans(data.plans || [])).catch(() => {}).finally(() => setLoading(false))
@@ -214,12 +223,37 @@ export default function Membership() {
               <p className="text-gray-400 text-lg">No membership plans available yet. Check back soon!</p>
             </div>
           ) : (
-            <div className={`grid grid-cols-1 gap-6 ${plans.length === 1 ? 'max-w-sm mx-auto' : plans.length === 2 ? 'md:grid-cols-2 max-w-2xl mx-auto' : 'md:grid-cols-3'}`}>
-              {plans.map((plan, i) => <PlanCard key={plan._id} plan={plan} billing={billing} index={i} />)}
-            </div>
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              viewport={viewportConfig}
+              className={`grid grid-cols-1 gap-6 ${plans.length === 1 ? 'max-w-sm mx-auto' : plans.length === 2 ? 'md:grid-cols-2 max-w-2xl mx-auto' : 'md:grid-cols-3'}`}
+            >
+              {plans.map((plan, i) => (
+              <PlanCard
+                key={plan._id}
+                plan={plan}
+                billing={billing}
+                index={i}
+                onBuy={() => user ? setPayModal(plan) : navigate('/register')}
+              />
+            ))}
+            </motion.div>
           )}
         </div>
       </section>
+
+      {/* Payment Modal */}
+      <AnimatePresence>
+        {payModal && (
+          <PaymentModal
+            plan={payModal}
+            billing={billing}
+            onClose={() => setPayModal(null)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Offer Lightbox */}
       <AnimatePresence>
@@ -258,7 +292,13 @@ export default function Membership() {
       {/* FAQs */}
       <section className="py-24 px-4 md:px-8 lg:px-16 bg-dark-100">
         <div className="max-w-3xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+            className="text-center mb-12"
+          >
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
               <div className="w-1.5 h-1.5 bg-primary rounded-full" />
               <span className="text-primary text-xs font-bold uppercase tracking-widest">FAQs</span>
@@ -267,11 +307,15 @@ export default function Membership() {
               Frequently Asked <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Questions</span>
             </h2>
           </motion.div>
-          <div className="space-y-3">
+          <motion.div
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+            viewport={viewportConfig}
+            className="space-y-3"
+          >
             {c.faqs.map((faq, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="bg-dark-200 border border-dark-400 hover:border-primary/25 rounded-2xl overflow-hidden transition-colors duration-200">
+              <motion.div key={i} variants={staggerItem} className="bg-dark-200 border border-dark-400 hover:border-primary/25 rounded-2xl overflow-hidden transition-colors duration-200">
                 <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full px-6 py-4 flex items-center justify-between text-left">
                   <span className="text-white font-medium text-sm">{faq.q}</span>
@@ -279,16 +323,20 @@ export default function Membership() {
                 </button>
                 <AnimatePresence>
                   {openFaq === i && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25 }}
-                      className="px-6 pb-4 text-gray-400 text-sm leading-relaxed overflow-hidden border-t border-dark-400">
+                    <motion.div
+                      variants={accordionContent}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      className="px-6 pb-4 text-gray-400 text-sm leading-relaxed overflow-hidden border-t border-dark-400"
+                    >
                       <div className="pt-3">{faq.a}</div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
     </>

@@ -4,6 +4,7 @@ import { FaTimes, FaChevronLeft, FaChevronRight, FaImages, FaExpand } from 'reac
 import PageHero from '../components/shared/PageHero'
 import api from '../utils/api'
 import { useSiteContent } from '../context/SiteContentContext'
+import { fadeInUp, staggerContainer, staggerItem, viewportConfig, modalVariant, buttonSpring } from '../utils/animations'
 
 const GALLERY_DEFAULTS = {
   heroBadge: 'Gallery',
@@ -41,16 +42,25 @@ export default function Gallery() {
       <section className="py-24 px-4 md:px-8 lg:px-16 bg-dark">
         <div className="max-w-7xl mx-auto">
           {/* Filters */}
-          <div className="flex flex-wrap gap-2 justify-center mb-12">
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+            className="flex flex-wrap gap-2 justify-center mb-12"
+          >
             {categories.map((cat) => (
-              <motion.button key={cat} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={() => setActive(cat)}
+              <motion.button
+                key={cat}
+                {...buttonSpring}
+                onClick={() => setActive(cat)}
                 className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${
                   active === cat ? 'bg-primary text-white shadow-lg shadow-primary/25' : 'bg-dark-200 text-gray-400 hover:bg-dark-300 hover:text-white border border-dark-400'
                 }`}>
                 {cat}
               </motion.button>
             ))}
-          </div>
+          </motion.div>
 
           {loading ? (
             <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
@@ -64,11 +74,18 @@ export default function Gallery() {
               <p className="text-gray-400 text-lg">{images.length === 0 ? 'No gallery images yet.' : `No ${active} images found.`}</p>
             </div>
           ) : (
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              viewport={viewportConfig}
+              className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4"
+            >
               {filtered.map((img, i) => (
-                <motion.div key={img._id} layout
-                  initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4, delay: i * 0.04 }}
+                <motion.div
+                  key={img._id}
+                  layout
+                  variants={staggerItem}
                   className="break-inside-avoid group relative overflow-hidden rounded-2xl cursor-pointer border border-dark-400 hover:border-primary/30 transition-colors duration-300"
                   onClick={() => setLightbox(img)}>
                   <img src={img.imageUrl} alt={img.title}
@@ -84,7 +101,7 @@ export default function Gallery() {
                   </div>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>
@@ -92,7 +109,11 @@ export default function Gallery() {
       {/* Lightbox */}
       <AnimatePresence>
         {lightbox && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          <motion.div
+            initial={overlayVariant.initial}
+            animate={overlayVariant.animate}
+            exit={overlayVariant.exit}
+            transition={overlayVariant.transition}
             className="fixed inset-0 z-50 bg-black/96 backdrop-blur-sm flex items-center justify-center p-4"
             onClick={() => setLightbox(null)}>
             <button onClick={() => setLightbox(null)} className="absolute top-4 right-4 w-10 h-10 bg-dark-300 hover:bg-dark-400 border border-dark-400 rounded-xl flex items-center justify-center text-gray-400 hover:text-white z-50 transition-colors">
@@ -106,7 +127,10 @@ export default function Gallery() {
               className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-dark-300 hover:bg-dark-400 border border-dark-400 rounded-xl flex items-center justify-center text-gray-400 hover:text-white z-50 transition-colors">
               <FaChevronRight />
             </button>
-            <motion.div initial={{ scale: 0.85 }} animate={{ scale: 1 }} exit={{ scale: 0.85 }}
+            <motion.div
+              initial={modalVariant.initial}
+              animate={modalVariant.animate}
+              exit={modalVariant.exit}
               className="max-w-4xl max-h-[85vh] relative rounded-2xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <img src={lightbox.imageUrl} alt={lightbox.title} className="w-full h-full object-contain" />
               <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">

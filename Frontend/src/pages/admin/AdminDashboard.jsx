@@ -1,17 +1,18 @@
 ﻿import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   FaDumbbell, FaUsers, FaUserTie, FaCrown, FaImages,
   FaMoneyBill, FaEnvelope, FaChartBar, FaHome, FaTachometerAlt,
   FaBars, FaTimes, FaSignOutAlt, FaMapMarkerAlt, FaAppleAlt,
   FaExchangeAlt, FaGlobe, FaFileAlt, FaQuoteLeft, FaRunning, FaEdit, FaLink,
-  FaPalette, FaDatabase, FaCamera, FaTag,
+  FaPalette, FaDatabase, FaCamera, FaTag, FaMoneyBillWave,
 } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { logout, setUser } from '../../store/slices/authSlice'
 import api from '../../utils/api'
 import toast from 'react-hot-toast'
+import { fadeInUp, staggerContainer, staggerItem, viewportConfig, buttonSpring, floatAnimation, floatAnimationSlow, cardHover, modalVariant, drawerVariant, pageTransition } from '../../utils/animations'
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: FaTachometerAlt },
@@ -20,6 +21,7 @@ const navItems = [
   { to: '/admin/plans', label: 'Plans', icon: FaCrown },
   { to: '/admin/branches', label: 'Branches', icon: FaMapMarkerAlt },
   { to: '/admin/transfer', label: 'Transfer', icon: FaExchangeAlt },
+  { to: '/admin/payments', label: 'Payments', icon: FaMoneyBillWave },
   { to: '/admin/content', label: 'Site Content', icon: FaEdit },
   { to: '/admin/navbar', label: 'Navbar', icon: FaLink },
   { to: '/admin/footer', label: 'Footer', icon: FaGlobe },
@@ -61,48 +63,108 @@ export function AdminLayout({ children }) {
 
   return (
     <div className="h-screen bg-dark flex overflow-hidden">
-      {/* Mobile backdrop */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
-      <aside className={`fixed lg:relative inset-y-0 left-0 z-50 lg:z-auto flex-shrink-0 flex flex-col bg-dark-100 border-r border-dark-400 transition-all duration-300 ${sidebarOpen ? 'w-64 translate-x-0' : '-translate-x-full w-64 lg:translate-x-0 lg:w-16'}`}>
+      {/* Floating background elements */}
+      <motion.div animate={floatAnimation.animate} className="absolute top-10 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+      <motion.div animate={floatAnimationSlow.animate} className="absolute bottom-10 right-10 w-56 h-56 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Mobile backdrop with animation */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar with drawer animation */}
+      <motion.aside
+        variants={drawerVariant}
+        initial={sidebarOpen ? 'open' : 'closed'}
+        animate={sidebarOpen ? 'open' : 'closed'}
+        className={`fixed lg:relative inset-y-0 left-0 z-50 lg:z-auto flex-shrink-0 flex flex-col bg-dark-100 border-r border-dark-400 ${sidebarOpen ? 'w-64' : 'lg:w-16'}`}
+      >
         <div className={`flex items-center ${sidebarOpen ? 'gap-3 px-6' : 'justify-center px-3'} py-5 border-b border-dark-400`}>
-          <div className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0">
+          <motion.div
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center flex-shrink-0"
+          >
             <FaDumbbell className="text-white text-sm" />
-          </div>
-          {sidebarOpen && <span className="text-lg font-black text-white" style={{ fontFamily: 'Oswald' }}>ADMIN PANEL</span>}
+          </motion.div>
+          {sidebarOpen && (
+            <motion.span
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-lg font-black text-white"
+              style={{ fontFamily: 'Oswald' }}
+            >
+              ADMIN PANEL
+            </motion.span>
+          )}
         </div>
 
         <nav className="flex-1 py-4 px-2 overflow-y-auto">
-          {navItems.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={() => window.innerWidth < 1024 && setSidebarOpen(false)}
-              className={`flex items-center ${sidebarOpen ? 'gap-3 px-4' : 'justify-center px-2'} py-3 rounded-xl mb-1 text-sm font-medium transition-all ${
-                pathname === item.to ? 'bg-primary/15 text-primary border border-primary/20' : 'text-gray-400 hover:bg-dark-300 hover:text-white'
-              }`}
-            >
-              <item.icon className="text-base flex-shrink-0" />
-              {sidebarOpen && item.label}
-            </Link>
-          ))}
+          <motion.div
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+          >
+            {navItems.map((item) => (
+              <motion.div key={item.to} variants={staggerItem}>
+                <Link
+                  to={item.to}
+                  onClick={() => window.innerWidth < 1024 && setSidebarOpen(false)}
+                  className={`flex items-center ${sidebarOpen ? 'gap-3 px-4' : 'justify-center px-2'} py-3 rounded-xl mb-1 text-sm font-medium transition-all ${
+                    pathname === item.to ? 'bg-primary/15 text-primary border border-primary/20' : 'text-gray-400 hover:bg-dark-300 hover:text-white'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 3 }}
+                    className="text-base flex-shrink-0"
+                  >
+                    <item.icon />
+                  </motion.div>
+                  {sidebarOpen && item.label}
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
         </nav>
 
         <div className="px-2 pb-4">
-          <button
+          <motion.button
             onClick={() => { dispatch(logout()); navigate('/') }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             className={`w-full flex items-center ${sidebarOpen ? 'gap-3 px-4' : 'justify-center px-2'} py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors text-sm`}
           >
-            <FaSignOutAlt className="flex-shrink-0" />
+            <motion.div whileHover={{ rotate: 90 }}>
+              <FaSignOutAlt className="flex-shrink-0" />
+            </motion.div>
             {sidebarOpen && 'Logout'}
-          </button>
+          </motion.button>
         </div>
-      </aside>
+      </motion.aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="bg-dark-100 border-b border-dark-400 px-4 md:px-6 py-4 flex items-center justify-between">
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-400 hover:text-white transition-colors">
+        <motion.header
+          initial={{ y: -100 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-dark-100 border-b border-dark-400 px-4 md:px-6 py-4 flex items-center justify-between"
+        >
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="text-gray-400 hover:text-white transition-colors"
+          >
             {sidebarOpen ? <FaTimes /> : <FaBars />}
           </button>
           <div className="flex items-center gap-3">
@@ -111,13 +173,18 @@ export function AdminLayout({ children }) {
               onClick={() => fileRef.current?.click()}
               title="Click to update profile photo"
               className="relative group flex-shrink-0"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               {user?.avatar ? (
                 <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border-2 border-transparent group-hover:border-primary transition-colors" />
               ) : (
-                <div className="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold">
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 3 }}
+                  className="w-9 h-9 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold"
+                >
                   {user?.name?.charAt(0).toUpperCase() || 'A'}
-                </div>
+                </motion.div>
               )}
               <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 {uploading ? (
@@ -127,11 +194,24 @@ export function AdminLayout({ children }) {
                 )}
               </div>
             </button>
-            <span className="text-gray-300 text-sm hidden sm:block">{user?.name || 'Admin'}</span>
+            <motion.span
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="text-gray-300 text-sm hidden sm:block"
+            >
+              {user?.name || 'Admin'}
+            </motion.span>
           </div>
-        </header>
+        </motion.header>
 
-        <main className="flex-1 p-4 md:p-6 overflow-auto">{children}</main>
+        <motion.main
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="flex-1 p-4 md:p-6 overflow-auto"
+        >
+          {children}
+        </motion.main>
       </div>
     </div>
   )
@@ -157,72 +237,149 @@ export default function AdminDashboard() {
 
   const recentUsers = dashData?.recentUsers ?? []
 
+  const quickActions = [
+    { label: 'Add Trainer', icon: FaUserTie, to: '/admin/trainers', color: '#f4a261' },
+    { label: 'Manage Plans', icon: FaCrown, to: '/admin/plans', color: '#e63946' },
+    { label: 'Manage Gallery', icon: FaImages, to: '/admin/gallery', color: '#4361ee' },
+    { label: 'Diet Plans', icon: FaAppleAlt, to: '/admin/diet-plans', color: '#22c55e' },
+  ]
+
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        {/* Hero Section with page transition */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
           <h1 className="text-2xl font-black text-white mb-1" style={{ fontFamily: 'Oswald' }}>DASHBOARD OVERVIEW</h1>
           <p className="text-gray-400 text-sm">Welcome back, Admin! Here's what's happening today.</p>
         </motion.div>
 
-        {/* Stats */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="glass-card p-5 animate-pulse">
+        {/* Stats with stagger */}
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        >
+          {loading ? (
+            [0, 1, 2, 3].map((i) => (
+              <motion.div key={i} variants={staggerItem} className="glass-card p-5 animate-pulse">
                 <div className="h-10 w-10 bg-dark-400 rounded-xl mb-4" />
                 <div className="h-6 bg-dark-400 rounded w-20 mb-2" />
                 <div className="h-3 bg-dark-400 rounded w-28" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, i) => (
+              </motion.div>
+            ))
+          ) : (
+            stats.map((stat, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
+                variants={staggerItem}
                 className="glass-card p-5"
+                whileHover={{ y: -4, boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${stat.color}20` }}>
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: `${stat.color}20` }}
+                  >
                     <stat.icon style={{ color: stat.color }} />
-                  </div>
-                  <span className="text-xs font-semibold text-green-400 bg-green-500/10 px-2 py-1 rounded-full">{stat.change}</span>
+                  </motion.div>
+                  <motion.span
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 15, delay: i * 0.1 + 0.3 }}
+                    className="text-xs font-semibold text-green-400 bg-green-500/10 px-2 py-1 rounded-full"
+                  >
+                    {stat.change}
+                  </motion.span>
                 </div>
-                <div className="text-2xl font-black text-white mb-1" style={{ fontFamily: 'Oswald' }}>{stat.value}</div>
-                <div className="text-gray-400 text-xs">{stat.label}</div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 + 0.2 }}
+                  className="text-2xl font-black text-white mb-1"
+                  style={{ fontFamily: 'Oswald' }}
+                >
+                  {stat.value}
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.1 + 0.25 }}
+                  className="text-gray-400 text-xs"
+                >
+                  {stat.label}
+                </motion.div>
               </motion.div>
-            ))}
-          </div>
-        )}
+            ))
+          )}
+        </motion.div>
 
         {/* Recent Members */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-card p-6">
-          <div className="flex items-center justify-between mb-5">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="glass-card p-6"
+          whileHover={{ boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}
+        >
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center justify-between mb-5"
+          >
             <h2 className="text-white font-bold flex items-center gap-2">
-              <FaUsers className="text-primary" /> Recent Members
+              <motion.div whileHover={{ scale: 1.1, rotate: 5 }}>
+                <FaUsers className="text-primary" />
+              </motion.div>
+              Recent Members
             </h2>
-            <Link to="/admin/users" className="text-primary text-sm hover:underline">View all</Link>
-          </div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              whileHover={{ scale: 1.05 }}
+              className="text-primary text-sm hover:underline cursor-pointer"
+            >
+              View all
+            </motion.div>
+          </motion.div>
+
           {loading ? (
-            <div className="space-y-3">
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              className="space-y-3"
+            >
               {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center gap-3 animate-pulse">
+                <motion.div key={i} variants={staggerItem} className="flex items-center gap-3 animate-pulse">
                   <div className="w-8 h-8 bg-dark-400 rounded-full" />
                   <div className="flex-1">
                     <div className="h-3 bg-dark-400 rounded w-32 mb-1" />
                     <div className="h-3 bg-dark-400 rounded w-48" />
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : recentUsers.length === 0 ? (
-            <p className="text-gray-500 text-sm text-center py-4">No members yet</p>
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-gray-500 text-sm text-center py-4"
+            >
+              No members yet
+            </motion.p>
           ) : (
-            <div className="overflow-x-auto">
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              className="overflow-x-auto"
+            >
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-gray-500 text-xs border-b border-dark-400">
@@ -233,15 +390,30 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody>
                   {recentUsers.map((m, i) => (
-                    <tr key={i} className="border-b border-dark-400/50 hover:bg-dark-300/50 transition-colors">
+                    <motion.tr
+                      key={i}
+                      variants={staggerItem}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="border-b border-dark-400/50 hover:bg-dark-300/50 transition-colors"
+                      whileHover={{ x: 4 }}
+                    >
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-3">
                           {m.avatar ? (
-                            <img src={m.avatar} alt={m.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                            <motion.img
+                              src={m.avatar}
+                              alt={m.name}
+                              className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                              whileHover={{ scale: 1.1 }}
+                            />
                           ) : (
-                            <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary text-xs font-bold flex-shrink-0">
+                            <motion.div
+                              whileHover={{ scale: 1.1, rotate: 5 }}
+                              className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary text-xs font-bold flex-shrink-0"
+                            >
                               {m.name?.charAt(0) || '?'}
-                            </div>
+                            </motion.div>
                           )}
                           <div>
                             <div className="text-white text-sm font-medium">{m.name}</div>
@@ -254,46 +426,67 @@ export default function AdminDashboard() {
                         {m.createdAt ? new Date(m.createdAt).toLocaleDateString() : '—'}
                       </td>
                       <td className="py-3">
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                          m.membership?.status === 'active'  ? 'bg-green-500/10 text-green-400'  :
-                          m.membership?.status === 'expired' ? 'bg-red-500/10 text-red-400'      :
-                          m.membership?.status === 'frozen'  ? 'bg-blue-500/10 text-blue-400'    :
-                          m.membership?.status === 'pending' ? 'bg-yellow-500/10 text-yellow-400':
-                          'bg-gray-500/10 text-gray-500'
-                        }`}>
+                        <motion.span
+                          whileHover={{ scale: 1.05 }}
+                          className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                            m.membership?.status === 'active'  ? 'bg-green-500/10 text-green-400'  :
+                            m.membership?.status === 'expired' ? 'bg-red-500/10 text-red-400'      :
+                            m.membership?.status === 'frozen'  ? 'bg-blue-500/10 text-blue-400'    :
+                            m.membership?.status === 'pending' ? 'bg-yellow-500/10 text-yellow-400':
+                            'bg-gray-500/10 text-gray-500'
+                          }`}
+                        >
                           {m.membership?.status
                             ? m.membership.status.charAt(0).toUpperCase() + m.membership.status.slice(1)
                             : 'No Plan'}
-                        </span>
+                        </motion.span>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
                 </tbody>
               </table>
-            </div>
+            </motion.div>
           )}
         </motion.div>
 
-        {/* Quick Actions */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { label: 'Add Trainer', icon: FaUserTie, to: '/admin/trainers', color: '#f4a261' },
-            { label: 'Manage Plans', icon: FaCrown, to: '/admin/plans', color: '#e63946' },
-            { label: 'Manage Gallery', icon: FaImages, to: '/admin/gallery', color: '#4361ee' },
-            { label: 'Diet Plans', icon: FaAppleAlt, to: '/admin/diet-plans', color: '#22c55e' },
-          ].map((action, i) => (
-            <Link
-              key={i}
-              to={action.to}
-              className="glass-card p-5 text-center hover:border-primary/30 transition-all hover:-translate-y-1"
-            >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: `${action.color}20` }}>
-                <action.icon style={{ color: action.color }} />
-              </div>
-              <div className="text-white text-sm font-medium">{action.label}</div>
-            </Link>
+        {/* Quick Actions with stagger and hover effects */}
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          transition={{ delay: 0.5 }}
+          className="grid grid-cols-2 sm:grid-cols-4 gap-4"
+        >
+          {quickActions.map((action, i) => (
+            <motion.div key={i} variants={staggerItem}>
+              <Link
+                to={action.to}
+                className="glass-card p-5 text-center hover:border-primary/30 transition-all"
+                whileHover={{ y: -6, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.15, rotate: 5 }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+                  style={{ backgroundColor: `${action.color}20` }}
+                >
+                  <action.icon style={{ color: action.color }} />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-white text-sm font-medium"
+                >
+                  {action.label}
+                </motion.div>
+              </Link>
+            </motion.div>
           ))}
         </motion.div>
+
+        {/* Floating decorative elements */}
+        <motion.div animate={floatAnimation.animate} className="absolute top-20 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <motion.div animate={floatAnimationSlow.animate} className="absolute bottom-20 right-10 w-48 h-48 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
       </div>
     </AdminLayout>
   )

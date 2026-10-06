@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { FaQuoteLeft, FaStar, FaTrophy, FaUser } from 'react-icons/fa'
 import api from '../../utils/api'
+import { fadeInUp, staggerContainer, staggerItem, viewportConfig } from '../../utils/animations'
 
 function StarRow({ rating, small }) {
   return (
@@ -88,7 +89,11 @@ export default function Testimonials() {
       <div className="max-w-7xl mx-auto relative z-10">
 
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+        <motion.div
+          initial={fadeInUp.initial}
+          animate={fadeInUp.animate}
+          viewport={viewportConfig}
+          transition={fadeInUp.transition}
           className="text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
             <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
@@ -104,13 +109,18 @@ export default function Testimonials() {
         </motion.div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          viewport={viewportConfig}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+        >
 
           {/* Featured card */}
           {featured && (
             <motion.div
-              initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ duration: 0.6 }}
+              variants={staggerItem}
               className="lg:col-span-2 relative overflow-hidden rounded-2xl border border-primary/20 p-7 group"
               style={{ background: 'linear-gradient(135deg, rgba(230,57,70,0.08) 0%, rgba(10,10,10,0.98) 50%)' }}>
               <FaQuoteLeft className="text-primary/20 text-5xl absolute top-5 right-6" />
@@ -143,9 +153,10 @@ export default function Testimonials() {
 
           {/* Regular cards */}
           {rest.map((t, i) => (
-            <motion.div key={t._id}
-              initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }} transition={{ duration: 0.5, delay: (i + 1) * 0.1 }}
+            <motion.div
+              key={t._id}
+              variants={staggerItem}
+              whileHover={{ y: -4, transition: { duration: 0.3 } }}
               className="relative overflow-hidden rounded-2xl bg-dark-200 border border-dark-400 hover:border-primary/25 transition-all duration-300 p-6 group hover:-translate-y-1">
               <FaQuoteLeft className="text-white/5 text-4xl absolute top-4 right-4" />
 
@@ -174,7 +185,7 @@ export default function Testimonials() {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Bottom stat */}
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}

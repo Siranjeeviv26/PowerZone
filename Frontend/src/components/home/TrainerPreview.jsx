@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { FaInstagram, FaFacebook, FaTwitter, FaArrowRight, FaStar } from 'react-icons/fa'
 import api from '../../utils/api'
+import { fadeInUp, staggerContainer, staggerItem, viewportConfig, buttonSpring } from '../../utils/animations'
 
 const CARD_COLORS = ['#e63946', '#52b788', '#f4a261', '#4361ee']
 
@@ -32,7 +33,12 @@ export default function TrainerPreview() {
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+          >
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
               <div className="w-1.5 h-1.5 bg-primary rounded-full" />
               <span className="text-primary text-xs font-bold uppercase tracking-widest">Our Trainers</span>
@@ -43,9 +49,15 @@ export default function TrainerPreview() {
             </h2>
             <p className="text-gray-400 mt-2 text-base max-w-xl">Certified professionals dedicated to helping you achieve your best physique and performance.</p>
           </motion.div>
-          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+          >
             <Link to="/trainers">
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              <motion.button
+                {...buttonSpring}
                 className="flex items-center gap-2 border border-primary/30 hover:border-primary text-primary hover:text-white hover:bg-primary font-bold px-6 py-3 rounded-xl transition-all duration-300 text-sm whitespace-nowrap">
                 View All Trainers <FaArrowRight className="text-xs" />
               </motion.button>
@@ -54,7 +66,13 @@ export default function TrainerPreview() {
         </div>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          viewport={viewportConfig}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+        >
           {cards.map((trainer, i) => {
             const color = CARD_COLORS[i % CARD_COLORS.length]
             const num = String(i + 1).padStart(2, '0')
@@ -79,11 +97,10 @@ export default function TrainerPreview() {
             const social = trainer.socialLinks || {}
 
             return (
-              <motion.div key={trainer._id}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
+              <motion.div
+                key={trainer._id}
+                variants={staggerItem}
+                whileHover={{ y: -8, transition: { duration: 0.3 } }}
                 className="group relative rounded-2xl overflow-hidden bg-dark-200 border border-dark-400 hover:border-primary/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10 cursor-pointer">
 
                 {/* Image */}
@@ -164,7 +181,7 @@ export default function TrainerPreview() {
               </motion.div>
             )
           })}
-        </div>
+        </motion.div>
 
         {!loading && trainers.length === 0 && (
           <p className="text-center text-gray-500 py-12">No trainers available yet.</p>

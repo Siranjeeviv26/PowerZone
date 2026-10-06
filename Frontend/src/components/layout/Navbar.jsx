@@ -6,6 +6,7 @@ import { FaDumbbell, FaBars, FaTimes, FaUser, FaSignOutAlt, FaTachometerAlt } fr
 import { logout } from '../../store/slices/authSlice'
 import { useSiteContent } from '../../context/SiteContentContext'
 import api from '../../utils/api'
+import { fadeInDown, cardHover, easings } from '../../utils/animations'
 
 const NAV_DEFAULTS = {
   brandName1: 'POWER',
@@ -26,6 +27,42 @@ const NAV_DEFAULTS = {
   ],
 }
 
+// Animated nav link component
+function AnimatedNavLink({ link, pathname, hasActiveOffer, isMobile = false, onClick }) {
+  const isMembership = link.to === '/membership'
+  return (
+    <NavLink
+      key={link.to}
+      to={link.to}
+      end={link.to === '/'}
+      onClick={() => {
+        if (onClick) onClick()
+        if (pathname === link.to) window.scrollTo({ top: 0, behavior: 'smooth' })
+      }}
+      className={({ isActive }) =>
+        `relative ${isMobile ? 'flex items-center justify-between px-4 py-3 rounded-xl text-sm' : 'px-2.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap'} transition-all duration-200 ${
+          isActive
+            ? 'text-primary bg-primary/10'
+            : 'text-gray-300 hover:text-white hover:bg-white/5'
+        }`
+      }
+      whileHover={isMobile ? { x: 4 } : { scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {link.label}
+      {isMembership && hasActiveOffer && (
+        <span className="flex items-center gap-1 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full leading-none">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
+          </span>
+          NEW
+        </span>
+      )}
+    </NavLink>
+  )
+}
+
 export default function Navbar() {
   const saved = useSiteContent('navbar')
   const nav = saved
@@ -41,9 +78,19 @@ export default function Navbar() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
 
+  // Smooth scroll handler with throttle
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50)
-    window.addEventListener('scroll', onScroll)
+    let ticking = false
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 50)
+          ticking = false
+        })
+        ticking = true
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
@@ -61,9 +108,9 @@ export default function Navbar() {
 
   return (
     <motion.nav
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6 }}
+      variants={fadeInDown}
+      initial="initial"
+      animate="animate"
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
           ? 'bg-dark-100/95 backdrop-blur-xl shadow-2xl border-b border-white/5'
@@ -92,30 +139,12 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-0.5">
             {navLinks.map((link) => (
-              <NavLink
+              <AnimatedNavLink
                 key={link.to}
-                to={link.to}
-                end={link.to === '/'}
-                onClick={() => { if (pathname === link.to) window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                className={({ isActive }) =>
-                  `relative px-2.5 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 ${
-                    isActive
-                      ? 'text-primary bg-primary/10'
-                      : 'text-gray-300 hover:text-white hover:bg-white/5'
-                  }`
-                }
-              >
-                {link.label}
-                {link.to === '/membership' && hasActiveOffer && (
-                  <span className="absolute -top-1.5 -right-1 flex items-center gap-0.5 bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full leading-none">
-                    <span className="relative flex h-1.5 w-1.5 mr-0.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
-                    </span>
-                    NEW
-                  </span>
-                )}
-              </NavLink>
+                link={link}
+                pathname={pathname}
+                hasActiveOffer={hasActiveOffer}
+              />
             ))}
           </div>
 
@@ -218,28 +247,14 @@ export default function Navbar() {
           >
             <div className="px-4 py-6 space-y-1">
               {navLinks.map((link) => (
-                <NavLink
+                <AnimatedNavLink
                   key={link.to}
-                  to={link.to}
-                  end={link.to === '/'}
-                  onClick={() => { setMobileOpen(false); if (pathname === link.to) window.scrollTo({ top: 0, behavior: 'smooth' }) }}
-                  className={({ isActive }) =>
-                    `relative flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                      isActive ? 'text-primary bg-primary/10' : 'text-gray-300 hover:text-white hover:bg-white/5'
-                    }`
-                  }
-                >
-                  {link.label}
-                  {link.to === '/membership' && hasActiveOffer && (
-                    <span className="flex items-center gap-1 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full leading-none">
-                      <span className="relative flex h-1.5 w-1.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
-                      </span>
-                      NEW
-                    </span>
-                  )}
-                </NavLink>
+                  link={link}
+                  pathname={pathname}
+                  hasActiveOffer={hasActiveOffer}
+                  isMobile={true}
+                  onClick={() => setMobileOpen(false)}
+                />
               ))}
               <div className="pt-4 flex flex-col gap-3">
                 {user ? (

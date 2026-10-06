@@ -1,11 +1,28 @@
 ﻿import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { pageTransition } from './utils/animations'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }) }, [pathname])
   return null
 }
+
+// Page transition wrapper
+function PageTransition({ children }) {
+  return (
+    <motion.div
+      initial={pageTransition.initial}
+      animate={pageTransition.animate}
+      exit={pageTransition.exit}
+      transition={pageTransition.transition}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 import { Toaster } from 'react-hot-toast'
 import Layout from './components/layout/Layout'
 import Home from './pages/Home'
@@ -38,6 +55,7 @@ import ManageContent from './pages/admin/ManageContent'
 import ManageNavbar from './pages/admin/ManageNavbar'
 import ManageTheme from './pages/admin/ManageTheme'
 import ManageMasterData from './pages/admin/ManageMasterData'
+import ManagePayments from './pages/admin/ManagePayments'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Branches from './pages/Branches'
@@ -46,6 +64,8 @@ import AdminRoute from './components/shared/AdminRoute'
 import TrainerRoute from './components/shared/TrainerRoute'
 
 function App() {
+  const location = useLocation()
+
   return (
     <Router>
       <Toaster
@@ -56,43 +76,46 @@ function App() {
         }}
       />
       <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="about" element={<About />} />
-          <Route path="trainers" element={<Trainers />} />
-          <Route path="membership" element={<Membership />} />
-          <Route path="bmi-calculator" element={<BMICalculator />} />
-          <Route path="workouts" element={<Workouts />} />
-          <Route path="diet-plans" element={<DietPlans />} />
-          <Route path="gallery" element={<Gallery />} />
-          <Route path="branches" element={<Branches />} />
-          <Route path="contact" element={<Contact />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
-          <Route path="reset-password/:token" element={<ResetPassword />} />
-          <Route path="dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
-          <Route path="trainer" element={<TrainerRoute><TrainerDashboard /></TrainerRoute>} />
-          <Route path="admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
-          <Route path="admin/trainers" element={<AdminRoute><ManageTrainers /></AdminRoute>} />
-          <Route path="admin/plans" element={<AdminRoute><ManagePlans /></AdminRoute>} />
-          <Route path="admin/branches" element={<AdminRoute><ManageBranches /></AdminRoute>} />
-          <Route path="admin/workouts" element={<AdminRoute><ManageWorkouts /></AdminRoute>} />
-          <Route path="admin/diet-plans" element={<AdminRoute><ManageDietPlans /></AdminRoute>} />
-          <Route path="admin/gallery" element={<AdminRoute><ManageGallery /></AdminRoute>} />
-          <Route path="admin/transfer" element={<AdminRoute><ManageTransfer /></AdminRoute>} />
-          <Route path="admin/footer" element={<AdminRoute><ManageFooter /></AdminRoute>} />
-          <Route path="admin/legal" element={<AdminRoute><ManageLegal /></AdminRoute>} />
-          <Route path="admin/testimonials" element={<AdminRoute><ManageTestimonials /></AdminRoute>} />
-          <Route path="admin/activities" element={<AdminRoute><ManageActivities /></AdminRoute>} />
-          <Route path="admin/content" element={<AdminRoute><ManageContent /></AdminRoute>} />
-          <Route path="admin/navbar" element={<AdminRoute><ManageNavbar /></AdminRoute>} />
-          <Route path="admin/theme" element={<AdminRoute><ManageTheme /></AdminRoute>} />
-          <Route path="admin/master-data" element={<AdminRoute><ManageMasterData /></AdminRoute>} />
-        </Route>
-      </Routes>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<PageTransition><Home /></PageTransition>} />
+            <Route path="about" element={<PageTransition><About /></PageTransition>} />
+            <Route path="trainers" element={<PageTransition><Trainers /></PageTransition>} />
+            <Route path="membership" element={<PageTransition><Membership /></PageTransition>} />
+            <Route path="bmi-calculator" element={<PageTransition><BMICalculator /></PageTransition>} />
+            <Route path="workouts" element={<PageTransition><Workouts /></PageTransition>} />
+            <Route path="diet-plans" element={<PageTransition><DietPlans /></PageTransition>} />
+            <Route path="gallery" element={<PageTransition><Gallery /></PageTransition>} />
+            <Route path="branches" element={<PageTransition><Branches /></PageTransition>} />
+            <Route path="contact" element={<PageTransition><Contact /></PageTransition>} />
+            <Route path="login" element={<PageTransition><Login /></PageTransition>} />
+            <Route path="register" element={<PageTransition><Register /></PageTransition>} />
+            <Route path="forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+            <Route path="reset-password/:token" element={<PageTransition><ResetPassword /></PageTransition>} />
+            <Route path="dashboard" element={<PageTransition><ProtectedRoute><UserDashboard /></ProtectedRoute></PageTransition>} />
+            <Route path="trainer" element={<PageTransition><TrainerRoute><TrainerDashboard /></TrainerRoute></PageTransition>} />
+            <Route path="admin" element={<PageTransition><AdminRoute><AdminDashboard /></AdminRoute></PageTransition>} />
+            <Route path="admin/users" element={<PageTransition><AdminRoute><ManageUsers /></AdminRoute></PageTransition>} />
+            <Route path="admin/trainers" element={<PageTransition><AdminRoute><ManageTrainers /></AdminRoute></PageTransition>} />
+            <Route path="admin/plans" element={<PageTransition><AdminRoute><ManagePlans /></AdminRoute></PageTransition>} />
+            <Route path="admin/branches" element={<PageTransition><AdminRoute><ManageBranches /></AdminRoute></PageTransition>} />
+            <Route path="admin/workouts" element={<PageTransition><AdminRoute><ManageWorkouts /></AdminRoute></PageTransition>} />
+            <Route path="admin/diet-plans" element={<PageTransition><AdminRoute><ManageDietPlans /></AdminRoute></PageTransition>} />
+            <Route path="admin/gallery" element={<PageTransition><AdminRoute><ManageGallery /></AdminRoute></PageTransition>} />
+            <Route path="admin/transfer" element={<PageTransition><AdminRoute><ManageTransfer /></AdminRoute></PageTransition>} />
+            <Route path="admin/footer" element={<PageTransition><AdminRoute><ManageFooter /></AdminRoute></PageTransition>} />
+            <Route path="admin/legal" element={<PageTransition><AdminRoute><ManageLegal /></AdminRoute></PageTransition>} />
+            <Route path="admin/testimonials" element={<PageTransition><AdminRoute><ManageTestimonials /></AdminRoute></PageTransition>} />
+            <Route path="admin/activities" element={<PageTransition><AdminRoute><ManageActivities /></AdminRoute></PageTransition>} />
+            <Route path="admin/content" element={<PageTransition><AdminRoute><ManageContent /></AdminRoute></PageTransition>} />
+            <Route path="admin/navbar" element={<PageTransition><AdminRoute><ManageNavbar /></AdminRoute></PageTransition>} />
+            <Route path="admin/theme" element={<PageTransition><AdminRoute><ManageTheme /></AdminRoute></PageTransition>} />
+            <Route path="admin/master-data" element={<PageTransition><AdminRoute><ManageMasterData /></AdminRoute></PageTransition>} />
+            <Route path="admin/payments" element={<PageTransition><AdminRoute><ManagePayments /></AdminRoute></PageTransition>} />
+          </Route>
+        </Routes>
+      </AnimatePresence>
     </Router>
   )
 }

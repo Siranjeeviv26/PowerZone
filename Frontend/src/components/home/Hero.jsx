@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { FaPlay, FaArrowRight, FaFire, FaDumbbell, FaUsers } from 'react-icons/fa'
 import { useState } from 'react'
 import { useSiteContent } from '../../context/SiteContentContext'
+import { floatAnimation, floatAnimationSlow, buttonSpring, scrollIndicator } from '../../utils/animations'
 
 const particles = Array.from({ length: 18 }, (_, i) => ({
   id: i,
@@ -94,7 +95,8 @@ export default function Hero() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}
               className="flex flex-wrap gap-3 mb-12">
               <Link to="/membership">
-                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+                <motion.button
+                  {...buttonSpring}
                   className="group relative overflow-hidden h-14 flex items-center gap-2 bg-primary text-white font-black px-8 rounded-xl text-sm tracking-wider shadow-2xl shadow-primary/30 transition-all">
                   <span className="relative z-10 flex items-center gap-2">
                     {c.cta1Text} <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform duration-200" />
@@ -102,7 +104,8 @@ export default function Hero() {
                   <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                 </motion.button>
               </Link>
-              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+              <motion.button
+                {...buttonSpring}
                 onClick={() => setVideoOpen(true)}
                 className="h-14 flex items-center gap-3 border border-white/15 hover:border-primary/50 text-white font-semibold px-6 rounded-xl transition-all duration-300 text-sm backdrop-blur-sm">
                 <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/40 flex-shrink-0">
@@ -139,8 +142,7 @@ export default function Hero() {
 
               {/* Floating members card */}
               <motion.div
-                animate={{ y: [0, -12, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                animate={floatAnimation.animate}
                 className="absolute -left-10 top-1/3 bg-dark-100/95 backdrop-blur-md border border-primary/25 rounded-2xl p-4 shadow-2xl shadow-black/50">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -155,8 +157,7 @@ export default function Hero() {
 
               {/* Floating elite badge */}
               <motion.div
-                animate={{ y: [0, 12, 0] }}
-                transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+                animate={floatAnimationSlow.animate}
                 className="absolute -right-7 top-12 bg-primary rounded-2xl p-4 shadow-2xl shadow-primary/40">
                 <div className="text-white text-center">
                   <FaDumbbell className="text-2xl mx-auto mb-1.5" />
@@ -166,8 +167,7 @@ export default function Hero() {
 
               {/* Floating new members badge */}
               <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+                animate={floatAnimation.animate}
                 className="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-dark-100/95 backdrop-blur-md border border-white/10 rounded-2xl px-5 py-3 shadow-xl whitespace-nowrap">
                 <div className="flex items-center gap-2.5">
                   <div className="flex -space-x-2">
@@ -188,8 +188,7 @@ export default function Hero() {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
         <span className="text-gray-600 text-[10px] tracking-widest uppercase">Scroll</span>
-        <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity }}
-          className="w-5 h-8 border border-white/20 rounded-full flex justify-center pt-1.5">
+        <motion.div animate={scrollIndicator.animate} className="w-5 h-8 border border-white/20 rounded-full flex justify-center pt-1.5">
           <div className="w-1 h-2 bg-primary rounded-full" />
         </motion.div>
       </motion.div>

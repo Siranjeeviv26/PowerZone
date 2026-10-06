@@ -4,6 +4,7 @@ import { FaAppleAlt, FaCheck, FaChevronDown } from 'react-icons/fa'
 import PageHero from '../components/shared/PageHero'
 import api from '../utils/api'
 import { useSiteContent } from '../context/SiteContentContext'
+import { fadeInUp, staggerContainer, staggerItem, viewportConfig, cardHover, buttonSpring } from '../utils/animations'
 
 const DIETPLANS_DEFAULTS = {
   heroBadge: 'Nutrition',
@@ -39,16 +40,25 @@ export default function DietPlans() {
       <section className="py-24 px-4 md:px-8 lg:px-16 bg-dark">
         <div className="max-w-7xl mx-auto">
           {/* Filters */}
-          <div className="flex flex-wrap gap-2 justify-center mb-12">
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+            className="flex flex-wrap gap-2 justify-center mb-12"
+          >
             {goals.map((g) => (
-              <motion.button key={g} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }} onClick={() => setActive(g)}
+              <motion.button
+                key={g}
+                {...buttonSpring}
+                onClick={() => setActive(g)}
                 className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${
                   active === g ? 'bg-primary text-white shadow-lg shadow-primary/25' : 'bg-dark-200 text-gray-400 hover:bg-dark-300 hover:text-white border border-dark-400'
                 }`}>
                 {g}
               </motion.button>
             ))}
-          </div>
+          </motion.div>
 
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -69,13 +79,21 @@ export default function DietPlans() {
               <p className="text-gray-400 text-lg">{plans.length === 0 ? 'No diet plans available yet.' : `No ${active} plans found.`}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              viewport={viewportConfig}
+              className="grid grid-cols-1 md:grid-cols-2 gap-5"
+            >
               {filtered.map((plan, i) => {
                 const color = goalColors[plan.goal] || '#e63946'
                 const isOpen = selected?._id === plan._id
                 return (
-                  <motion.div key={plan._id} initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.08 }}
+                  <motion.div
+                    key={plan._id}
+                    variants={staggerItem}
+                    whileHover={cardHover.hover}
                     className="group rounded-2xl overflow-hidden bg-dark-200 border border-dark-400 hover:border-primary/30 transition-all duration-300 cursor-pointer"
                     onClick={() => setSelected(isOpen ? null : plan)}>
                     <div className="relative h-52 overflow-hidden">
@@ -134,7 +152,7 @@ export default function DietPlans() {
                   </motion.div>
                 )
               })}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>

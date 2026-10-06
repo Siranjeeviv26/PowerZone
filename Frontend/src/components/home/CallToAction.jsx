@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { FaArrowRight, FaCheck, FaBolt } from 'react-icons/fa'
 import { useSiteContent } from '../../context/SiteContentContext'
+import { fadeInUp, floatAnimation, floatAnimationSlow, buttonSpring } from '../../utils/animations'
 
 const CTA_DEFAULTS = {
   badge: 'Limited Time Offer',
@@ -38,8 +39,14 @@ export default function CallToAction() {
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent z-10" />
 
       {/* Decorative elements */}
-      <div className="absolute top-10 right-10 w-72 h-72 bg-primary/8 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-56 h-56 bg-secondary/8 rounded-full blur-3xl pointer-events-none" />
+      <motion.div
+        animate={floatAnimation.animate}
+        className="absolute top-10 right-10 w-72 h-72 bg-primary/8 rounded-full blur-3xl pointer-events-none"
+      />
+      <motion.div
+        animate={floatAnimationSlow.animate}
+        className="absolute bottom-10 right-1/4 w-56 h-56 bg-secondary/8 rounded-full blur-3xl pointer-events-none"
+      />
       <div className="absolute top-0 left-0 bottom-0 w-1 bg-gradient-to-b from-transparent via-primary/20 to-transparent" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-28">
@@ -64,7 +71,8 @@ export default function CallToAction() {
 
             <div className="flex flex-wrap gap-4">
               <Link to="/register">
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                <motion.button
+                  {...buttonSpring}
                   className="group relative overflow-hidden h-14 flex items-center gap-2 bg-primary text-white font-black px-8 rounded-xl text-sm tracking-wider shadow-2xl shadow-primary/30">
                   <span className="relative z-10 flex items-center gap-2">
                     Claim Free Trial <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform" />
@@ -73,7 +81,8 @@ export default function CallToAction() {
                 </motion.button>
               </Link>
               <Link to="/membership">
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                <motion.button
+                  {...buttonSpring}
                   className="h-14 flex items-center gap-2 border border-white/20 hover:border-primary/50 text-white font-bold px-8 rounded-xl transition-all duration-300 text-sm backdrop-blur-sm">
                   View Plans
                 </motion.button>

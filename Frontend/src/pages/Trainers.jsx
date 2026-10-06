@@ -5,6 +5,7 @@ import CallToAction from '../components/home/CallToAction'
 import PageHero from '../components/shared/PageHero'
 import api from '../utils/api'
 import { useSiteContent } from '../context/SiteContentContext'
+import { fadeInUp, staggerContainer, staggerItem, cardHover, easings, viewportConfig } from '../utils/animations'
 
 const PLACEHOLDER_IMG = 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80'
 
@@ -19,10 +20,11 @@ const TRAINERS_DEFAULTS = {
 function TrainerCard({ trainer, index }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.07 }}
+      variants={staggerItem}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      whileHover={cardHover.hover}
       className="group relative rounded-2xl overflow-hidden bg-dark-200 border border-dark-400 hover:border-primary/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10 cursor-pointer"
     >
       <div className="relative overflow-hidden h-64">
@@ -109,8 +111,13 @@ export default function Trainers() {
 
       <section className="py-24 px-4 md:px-8 lg:px-16 bg-dark-100">
         <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="flex gap-6 items-start mb-14">
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+            className="flex gap-6 items-start mb-14"
+          >
             <div className="w-1 self-stretch bg-gradient-to-b from-primary to-transparent rounded-full flex-shrink-0 min-h-[70px]" />
             <div>
               <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-3">
@@ -142,9 +149,15 @@ export default function Trainers() {
               <p className="text-gray-400 text-lg">No trainers available yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              viewport={viewportConfig}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+            >
               {trainers.map((trainer, i) => <TrainerCard key={trainer._id} trainer={trainer} index={i} />)}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>

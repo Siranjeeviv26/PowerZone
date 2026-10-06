@@ -4,6 +4,7 @@ import {
   FaStar, FaBolt, FaShieldAlt, FaClock
 } from 'react-icons/fa'
 import { useSiteContent } from '../../context/SiteContentContext'
+import { fadeInUp, staggerContainer, staggerItem, viewportConfig, cardHover } from '../../utils/animations'
 
 const FEATURE_ICONS = [FaDumbbell, FaHeartbeat, FaAppleAlt, FaUsers, FaStar, FaBolt, FaShieldAlt, FaClock]
 
@@ -37,7 +38,11 @@ export default function Features() {
       <div className="max-w-7xl mx-auto">
 
         {/* Section header — left aligned with red line */}
-        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+        <motion.div
+          initial={fadeInUp.initial}
+          animate={fadeInUp.animate}
+          viewport={viewportConfig}
+          transition={fadeInUp.transition}
           className="flex gap-8 items-start mb-16">
           <div className="w-1 self-stretch bg-gradient-to-b from-primary to-transparent rounded-full flex-shrink-0 min-h-[80px]" />
           <div>
@@ -56,13 +61,20 @@ export default function Features() {
         </motion.div>
 
         {/* First 2: large spotlight cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          viewport={viewportConfig}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"
+        >
           {c.features.slice(0, 2).map((f, i) => {
             const Icon = FEATURE_ICONS[i]
             return (
-              <motion.div key={f.num}
-                initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}
+              <motion.div
+                key={f.num}
+                variants={staggerItem}
+                whileHover={cardHover.hover}
                 className="group relative overflow-hidden rounded-2xl border border-dark-400 hover:border-primary/30 transition-all duration-300 p-7 cursor-default"
                 style={{ background: `linear-gradient(135deg, ${f.color}08 0%, #0a0a0a 60%)` }}>
                 <div className="absolute top-4 right-5 text-[5rem] font-black leading-none pointer-events-none select-none"
@@ -84,16 +96,23 @@ export default function Features() {
               </motion.div>
             )
           })}
-        </div>
+        </motion.div>
 
         {/* Remaining 6: compact grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          viewport={viewportConfig}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
           {c.features.slice(2).map((f, i) => {
             const Icon = FEATURE_ICONS[i + 2]
             return (
-              <motion.div key={f.num}
-                initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }} transition={{ duration: 0.4, delay: i * 0.07 }}
+              <motion.div
+                key={f.num}
+                variants={staggerItem}
+                whileHover={cardHover.hover}
                 className="group relative overflow-hidden bg-dark-200 border border-dark-400 hover:border-primary/25 rounded-2xl p-5 cursor-default transition-all duration-300 hover:-translate-y-1">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300"
@@ -107,7 +126,7 @@ export default function Features() {
               </motion.div>
             )
           })}
-        </div>
+        </motion.div>
       </div>
     </section>
   )

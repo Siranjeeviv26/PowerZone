@@ -5,6 +5,7 @@ import { FaMapMarkerAlt, FaPhone, FaUser, FaArrowRight } from 'react-icons/fa'
 import PageHero from '../components/shared/PageHero'
 import api from '../utils/api'
 import { useSiteContent } from '../context/SiteContentContext'
+import { fadeInUp, staggerContainer, staggerItem, viewportConfig, cardHover, buttonSpring } from '../utils/animations'
 
 const BRANCHES_DEFAULTS = {
   heroBadge: 'Our Locations',
@@ -61,10 +62,18 @@ export default function Branches() {
               <p className="text-gray-400 text-lg">No branches listed yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              viewport={viewportConfig}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+            >
               {branches.map((branch, i) => (
-                <motion.div key={branch._id} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }} transition={{ duration: 0.5, delay: i * 0.1 }}
+                <motion.div
+                  key={branch._id}
+                  variants={staggerItem}
+                  whileHover={cardHover.hover}
                   className="group relative overflow-hidden rounded-2xl bg-dark-200 border border-dark-400 hover:border-primary/30 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
                   {/* Top accent */}
                   <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/0 via-primary/40 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -107,7 +116,7 @@ export default function Branches() {
                   </div>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>
@@ -115,7 +124,12 @@ export default function Branches() {
       {/* Transfer CTA */}
       <section className="py-20 px-4 md:px-8 lg:px-16 bg-dark-100">
         <div className="max-w-3xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <motion.div
+            initial={fadeInUp.initial}
+            animate={fadeInUp.animate}
+            viewport={viewportConfig}
+            transition={fadeInUp.transition}
+          >
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
               <div className="w-1.5 h-1.5 bg-primary rounded-full" />
               <span className="text-primary text-xs font-bold uppercase tracking-widest">Existing Members</span>
@@ -126,13 +140,15 @@ export default function Branches() {
             <p className="text-gray-400 mb-8 leading-relaxed">Already a member? Transfer to any branch from your dashboard. A one-time transfer fee applies.</p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link to="/dashboard">
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                <motion.button
+                  {...buttonSpring}
                   className="h-12 flex items-center gap-2 bg-primary text-white font-bold px-7 rounded-xl text-sm shadow-lg shadow-primary/25 transition-all">
                   Go to Dashboard <FaArrowRight className="text-xs" />
                 </motion.button>
               </Link>
               <Link to="/contact">
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                <motion.button
+                  {...buttonSpring}
                   className="h-12 flex items-center gap-2 border border-dark-400 hover:border-primary text-gray-300 hover:text-white font-bold px-7 rounded-xl text-sm transition-all">
                   Contact Us
                 </motion.button>

@@ -7,6 +7,7 @@ import {
 } from 'react-icons/fa'
 import api from '../../utils/api'
 import LegalModal from '../shared/LegalModal'
+import { fadeInUp, staggerContainer, staggerItem, cardHover, easings } from '../../utils/animations'
 
 const footerLinks = {
   'Quick Links': [
@@ -78,9 +79,21 @@ export default function Footer() {
 
   return (
     <>
-    <footer className="bg-dark-100 border-t border-white/5">
+    <motion.footer
+      initial={fadeInUp.initial}
+      whileInView={fadeInUp.animate}
+      viewport={{ once: true, margin: '-100px' }}
+      transition={fadeInUp.transition}
+      className="bg-dark-100 border-t border-white/5"
+    >
       {/* Newsletter */}
-      <div className="bg-gradient-to-r from-primary/20 to-secondary/10 border-b border-white/5">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-100px' }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="bg-gradient-to-r from-primary/20 to-secondary/10 border-b border-white/5"
+      >
         <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
@@ -105,17 +118,26 @@ export default function Footer() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Main Footer */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-16">
+      <motion.div
+        variants={staggerContainer}
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, margin: '-100px' }}
+        className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-16"
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Brand */}
-          <div>
-            <Link to="/" className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+          <motion.div variants={staggerItem}>
+            <Link to="/" className="flex items-center gap-3 mb-6" whileHover={{ scale: 1.03 }}>
+              <motion.div
+                className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center"
+                whileHover={{ rotate: 180, scale: 1.1, transition: { duration: 0.4 } }}
+              >
                 <FaDumbbell className="text-white text-lg" />
-              </div>
+              </motion.div>
               <span className="text-2xl font-black text-white" style={{ fontFamily: 'Oswald' }}>
                 POWER<span className="text-primary">ZONE</span>
               </span>
@@ -125,79 +147,105 @@ export default function Footer() {
               expert trainers, and a community that pushes you to be your best.
             </p>
             <div className="flex gap-3">
-              {socials.map(({ icon: Icon, href }, i) => (
+              {socials.map(({ icon: Icon, href, color }, i) => (
                 <motion.a
                   key={i}
                   href={href}
                   target={href !== '#' ? '_blank' : undefined}
                   rel={href !== '#' ? 'noopener noreferrer' : undefined}
-                  whileHover={{ scale: 1.1, y: -2 }}
+                  whileHover={{ scale: 1.15, y: -3, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
                   className="w-9 h-9 bg-dark-300 border border-dark-500 rounded-lg flex items-center justify-center transition-all duration-200 hover:border-primary/50"
+                  style={{ borderColor: `${color}40` }}
                 >
-                  <Icon className="text-gray-400 hover:text-white text-sm" />
+                  <Icon className="text-gray-400 hover:text-white text-sm" style={{ color }} />
                 </motion.a>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {/* Links */}
           {Object.entries(footerLinks).map(([title, links]) => (
-            <div key={title}>
+            <motion.div key={title} variants={staggerItem}>
               <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">{title}</h4>
               <ul className="space-y-3">
                 {links.map((link) => (
-                  <li key={link.label}>
+                  <motion.li key={link.label}>
                     <Link
                       to={link.to}
                       className="text-gray-400 hover:text-primary text-sm transition-colors duration-200 flex items-center gap-2 group"
                     >
-                      <span className="w-0 group-hover:w-3 h-px bg-primary transition-all duration-200" />
+                      <motion.span
+                        className="w-0 group-hover:w-3 h-px bg-primary transition-all duration-200"
+                        animate={{ width: '0.75rem' }}
+                        initial={{ width: 0 }}
+                      />
                       {link.label}
                     </Link>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           ))}
 
           {/* Contact */}
-          <div>
+          <motion.div variants={staggerItem}>
             <h4 className="text-white font-bold mb-6 text-sm uppercase tracking-widest">Contact Us</h4>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                <motion.div
+                  className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+                  whileHover={{ scale: 1.1, rotate: 10 }}
+                >
                   <FaMapMarkerAlt className="text-primary text-sm" />
-                </div>
+                </motion.div>
                 <span className="text-gray-400 text-sm">{settings.address}</span>
               </li>
               <li className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <motion.div
+                  className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  whileHover={{ scale: 1.1, rotate: -10 }}
+                >
                   <FaPhone className="text-primary text-sm" />
-                </div>
+                </motion.div>
                 <a href={`tel:${settings.phone.replace(/\s/g, '')}`} className="text-gray-400 hover:text-primary text-sm transition-colors">
                   {settings.phone}
                 </a>
               </li>
               <li className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <motion.div
+                  className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  whileHover={{ scale: 1.1, rotate: 10 }}
+                >
                   <FaEnvelope className="text-primary text-sm" />
-                </div>
+                </motion.div>
                 <a href={`mailto:${settings.email}`} className="text-gray-400 hover:text-primary text-sm transition-colors">
                   {settings.email}
                 </a>
               </li>
             </ul>
-            <div className="mt-6 p-4 bg-dark-200 rounded-xl border border-dark-400">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="mt-6 p-4 bg-dark-200 rounded-xl border border-dark-400 hover:border-primary/30 transition-colors duration-300"
+            >
               <p className="text-xs text-gray-500 mb-1">Opening Hours</p>
               <p className="text-sm text-white font-medium">{settings.weekdayHours}</p>
               <p className="text-sm text-white font-medium">{settings.weekendHours}</p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-white/5">
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: '-100px' }}
+        transition={{ delay: 0.5 }}
+        className="border-t border-white/5"
+      >
         <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-500 text-sm">
             © {new Date().getFullYear()} PowerZone Gym. All rights reserved.
@@ -207,8 +255,8 @@ export default function Footer() {
             <button onClick={() => setLegalModal('terms')} className="text-gray-500 hover:text-primary text-xs transition-colors">Terms of Service</button>
           </div>
         </div>
-      </div>
-    </footer>
+      </motion.div>
+    </motion.footer>
     {legalModal && <LegalModal type={legalModal} onClose={() => setLegalModal(null)} />}
   </>
   )

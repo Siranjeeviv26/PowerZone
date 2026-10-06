@@ -15,6 +15,7 @@ import { updateProfile, logout, setUser } from '../store/slices/authSlice'
 import { validate, required, minLen, maxLen, phone, positiveNum, numRange, fieldClass } from '../utils/validate'
 // phone also used directly for inline blur validation
 import PhoneInput from '../components/shared/PhoneInput'
+import { fadeInUp, staggerContainer, staggerItem, viewportConfig, buttonSpring, floatAnimation, floatAnimationSlow, cardHover, modalVariant, drawerVariant, pageTransition } from '../utils/animations'
 
 
 const Err = ({ msg }) => msg ? <p className="text-red-400 text-xs mt-1">{msg}</p> : null
@@ -349,14 +350,22 @@ export default function UserDashboard() {
 
   if (loading) return (
     <div className="min-h-screen bg-dark flex items-center justify-center">
-      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <motion.div
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+        className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"
+      />
     </div>
   )
 
   return (
     <div className="min-h-screen bg-dark flex flex-col">
       {/* Top bar */}
-      <div className="bg-dark-100 border-b border-dark-400 px-4 md:px-8 py-3 flex items-center justify-between sticky top-0 z-30 flex-shrink-0">
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-dark-100 border-b border-dark-400 px-4 md:px-8 py-3 flex items-center justify-between sticky top-0 z-30 flex-shrink-0"
+      >
         <Link to="/" className="font-black text-white text-lg" style={{ fontFamily: 'Oswald' }}>
           POWER<span className="text-primary">ZONE</span>
         </Link>
@@ -364,24 +373,39 @@ export default function UserDashboard() {
           <Link to="/" className="text-gray-400 hover:text-white text-xs flex items-center gap-1.5 transition-colors">
             <FaHome className="text-[11px]" /> View Site
           </Link>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => { dispatch(logout()); navigate('/login') }}
             className="text-gray-400 hover:text-red-400 text-xs flex items-center gap-1.5 transition-colors"
           >
             <FaSignOutAlt className="text-[11px]" /> Logout
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.header>
 
       <div className="flex-1 overflow-auto">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-6">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="max-w-7xl mx-auto px-4 md:px-8 lg:px-16 py-6"
+      >
 
         {/* Dashboard Banner */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-3xl mb-5 border border-dark-400">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="relative overflow-hidden rounded-3xl mb-5 border border-dark-400"
+        >
           <div className="absolute inset-0 bg-gradient-to-br from-dark-100 via-dark-200 to-dark-100" />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/8 via-transparent to-secondary/5" />
           <div className="absolute -top-12 -right-12 w-48 h-48 bg-primary/6 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-10 left-1/3 w-32 h-32 bg-secondary/5 rounded-full blur-2xl pointer-events-none" />
+
+          {/* Decorative floating elements */}
+          <motion.div animate={floatAnimation.animate} className="absolute top-20 left-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+          <motion.div animate={floatAnimationSlow.animate} className="absolute bottom-10 right-10 w-32 h-32 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative px-5 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             {/* Left: Avatar + Info */}
@@ -431,18 +455,27 @@ export default function UserDashboard() {
 
             {/* Right: Quick Stats + Bell */}
             <div className="flex items-center gap-3 flex-wrap">
-              <div className="hidden sm:flex items-center gap-2">
+              <motion.div
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+                className="hidden sm:flex items-center gap-2"
+              >
                 {[
                   { value: totalThisMonth, label: 'This Month', color: 'text-orange-400' },
                   { value: attendance.length, label: 'Check-ins', color: 'text-white' },
                   { value: `${streak}🔥`, label: 'Streak', color: 'text-primary' },
-                ].map((s) => (
-                  <div key={s.label} className="text-center px-3 py-2 bg-dark-300/60 rounded-xl border border-dark-500/50 min-w-[56px]">
+                ].map((s, i) => (
+                  <motion.div
+                    key={s.label}
+                    variants={staggerItem}
+                    className="text-center px-3 py-2 bg-dark-300/60 rounded-xl border border-dark-500/50 min-w-[56px] whileHover={{ scale: 1.05 }}"
+                  >
                     <div className={`text-base font-black leading-none ${s.color}`} style={{ fontFamily: 'Oswald' }}>{s.value}</div>
                     <div className="text-[10px] text-gray-500 mt-0.5 whitespace-nowrap">{s.label}</div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
               {profile?.personalTrainer && (
                 <button
                   onClick={() => setTrainerModal({ ...profile.personalTrainer, type: 'Personal Trainer' })}
@@ -472,38 +505,51 @@ export default function UserDashboard() {
             (a) => !a.registeredUsers?.some((u) => (u._id || u).toString() === myId)
           ).length
           return (
-            <div className="flex gap-1.5 overflow-x-auto pb-2 mb-6">
-              {tabConfig.map(({ id, label, icon: Icon }) => {
-                const badge = id === 'activities' && unregisteredCount > 0 ? unregisteredCount : 0
-                return (
-                  <button
-                    key={id}
-                    onClick={() => setActiveTab(id)}
-                    className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
-                      activeTab === id
-                        ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                        : 'bg-dark-200 text-gray-400 hover:bg-dark-300 hover:text-white border border-dark-400'
-                    }`}
-                  >
-                    <Icon className="text-xs" />
-                    {label}
-                    {badge > 0 && (
-                      <span className={`ml-0.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black flex items-center justify-center leading-none ${
-                        activeTab === id ? 'bg-white text-primary' : 'bg-primary text-white'
-                      }`}>
-                        {badge > 99 ? '99+' : badge}
-                      </span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+            >
+              <div className="flex gap-1.5 overflow-x-auto pb-2 mb-6">
+                {tabConfig.map(({ id, label, icon: Icon }) => {
+                  const badge = id === 'activities' && unregisteredCount > 0 ? unregisteredCount : 0
+                  return (
+                    <motion.button
+                      key={id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setActiveTab(id)}
+                      className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
+                        activeTab === id
+                          ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                          : 'bg-dark-200 text-gray-400 hover:bg-dark-300 hover:text-white border border-dark-400'
+                      }`}
+                    >
+                      <Icon className="text-xs" />
+                      {label}
+                      {badge > 0 && (
+                        <span className={`ml-0.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black flex items-center justify-center leading-none ${
+                          activeTab === id ? 'bg-white text-primary' : 'bg-primary text-white'
+                        }`}>
+                          {badge > 99 ? '99+' : badge}
+                        </span>
+                      )}
+                    </motion.button>
+                  )
+                })}
+              </div>
+            </motion.div>
           )
         })()}
 
         {/* OVERVIEW TAB */}
         {activeTab === 'overview' && (
-          <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-6"
+          >
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { icon: FaFire, label: 'This Month', value: `${totalThisMonth}`, unit: 'sessions', color: '#f4a261', bg: 'from-orange-500/10 to-transparent' },
@@ -585,89 +631,141 @@ export default function UserDashboard() {
 
             {/* Membership Dates */}
             {(profile?.membership?.joiningDate || profile?.membership?.paymentDate || profile?.membership?.nextPaymentDate) && (
-              <div className="glass-card p-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={viewportConfig}
+                className="glass-card p-6"
+              >
                 <h3 className="text-white font-bold mb-4 flex items-center gap-2">
                   <FaCalendarAlt className="text-primary" /> Membership Dates
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <motion.div
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                  className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+                >
                   {[
                     { label: 'Joining Date', value: profile.membership?.joiningDate, color: '#4361ee' },
                     { label: 'Last Payment', value: profile.membership?.paymentDate, color: '#2ec27e' },
                     { label: 'Next Payment', value: profile.membership?.nextPaymentDate, color: '#f59e0b' },
-                  ].map((item) => (
-                    <div key={item.label} className="p-4 bg-dark-300 rounded-xl">
+                  ].map((item, i) => (
+                    <motion.div
+                      key={item.label}
+                      variants={staggerItem}
+                      className="p-4 bg-dark-300 rounded-xl whileHover={{ y: -4 }}"
+                    >
                       <div className="text-gray-500 text-xs mb-1">{item.label}</div>
                       <div className="text-sm font-bold" style={{ color: item.value ? item.color : undefined }}>
                         {item.value ? new Date(item.value).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : <span className="text-gray-600">Not set</span>}
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             )}
 
             {/* Branch Card */}
             {profile?.branch && (
-              <div className="glass-card p-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={viewportConfig}
+                className="glass-card p-6 whileHover={{ y: -4 }}"
+              >
                 <h3 className="text-white font-bold mb-4 flex items-center gap-2">
                   <FaMapMarkerAlt className="text-primary" /> Your Branch
                 </h3>
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 3 }}
+                    className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center flex-shrink-0"
+                  >
                     <FaMapMarkerAlt className="text-primary text-lg" />
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 flex-1">
-                    <div>
+                  </motion.div>
+                  <motion.div
+                    variants={staggerContainer}
+                    initial="initial"
+                    animate="animate"
+                    className="grid grid-cols-2 sm:grid-cols-3 gap-4 flex-1"
+                  >
+                    <motion.div
+                      variants={staggerItem}
+                      className="whileHover={{ x: 4 }}"
+                    >
                       <div className="text-gray-500 text-xs mb-0.5">Branch</div>
                       <div className="text-white font-semibold text-sm">{profile.branch.name}</div>
-                    </div>
+                    </motion.div>
                     {profile.branch.location && (
-                      <div>
+                      <motion.div
+                        variants={staggerItem}
+                        className="whileHover={{ x: 4 }}"
+                      >
                         <div className="text-gray-500 text-xs mb-0.5">Location</div>
                         <div className="text-white text-sm">{profile.branch.location}</div>
-                      </div>
+                      </motion.div>
                     )}
                     {profile.branch.address && (
-                      <div>
+                      <motion.div
+                        variants={staggerItem}
+                        className="whileHover={{ x: 4 }}"
+                      >
                         <div className="text-gray-500 text-xs mb-0.5">Address</div>
                         <div className="text-white text-sm">{profile.branch.address}</div>
-                      </div>
+                      </motion.div>
                     )}
                     {profile.branch.manager && (
-                      <div>
+                      <motion.div
+                        variants={staggerItem}
+                        className="whileHover={{ x: 4 }}"
+                      >
                         <div className="text-gray-500 text-xs mb-0.5">Manager</div>
                         <div className="text-white text-sm">{profile.branch.manager}</div>
-                      </div>
+                      </motion.div>
                     )}
                     {profile.branch.phone && (
-                      <div>
+                      <motion.div
+                        variants={staggerItem}
+                        className="whileHover={{ x: 4 }}"
+                      >
                         <div className="text-gray-500 text-xs mb-0.5">Contact</div>
                         <div className="text-primary text-sm font-medium">{profile.branch.phone}</div>
-                      </div>
+                      </motion.div>
                     )}
-                  </div>
+                  </motion.div>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Trainer Cards */}
             {(profile?.personalTrainer || profile?.classTrainer) && (
-              <div className={`grid grid-cols-1 ${profile.personalTrainer && profile.classTrainer ? 'sm:grid-cols-2' : ''} gap-4`}>
+              <motion.div
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+                className={`grid grid-cols-1 ${profile.personalTrainer && profile.classTrainer ? 'sm:grid-cols-2' : ''} gap-4`}
+              >
                 {profile?.personalTrainer && (
-                  <div className="glass-card p-6">
+                  <motion.div
+                    variants={staggerItem}
+                    className="glass-card p-6 whileHover={{ y: -4 }}"
+                  >
                     <h3 className="text-white font-bold mb-4 flex items-center gap-2">
                       <FaUserTie className="text-primary" /> Personal Trainer
                     </h3>
                     <div className="flex items-center gap-4">
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => setTrainerModal({ ...profile.personalTrainer, type: 'Personal Trainer' })}
-                        className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center text-white text-xl font-black flex-shrink-0 hover:scale-105 transition-transform cursor-pointer overflow-hidden"
+                        className="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center text-white text-xl font-black flex-shrink-0 cursor-pointer overflow-hidden"
                         title="View trainer details"
                       >
                         {profile.personalTrainer.image
                           ? <img src={profile.personalTrainer.image} alt={profile.personalTrainer.name} className="w-full h-full object-cover" />
                           : profile.personalTrainer.name?.charAt(0)}
-                      </button>
+                      </motion.button>
                       <div>
                         {profile.personalTrainer.trainerId && <div className="text-xs font-mono text-gray-500 mb-0.5">{profile.personalTrainer.trainerId}</div>}
                         <button onClick={() => setTrainerModal({ ...profile.personalTrainer, type: 'Personal Trainer' })} className="text-white font-bold hover:text-primary transition-colors text-left">
@@ -677,23 +775,28 @@ export default function UserDashboard() {
                         {profile.personalTrainer.phone && <div className="text-gray-400 text-xs mt-0.5">{profile.personalTrainer.phone}</div>}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
                 {profile?.classTrainer && (
-                  <div className="glass-card p-6">
+                  <motion.div
+                    variants={staggerItem}
+                    className="glass-card p-6 whileHover={{ y: -4 }}"
+                  >
                     <h3 className="text-white font-bold mb-4 flex items-center gap-2">
                       <FaUserTie className="text-purple-400" /> Class Trainer
                     </h3>
                     <div className="flex items-center gap-4">
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => setTrainerModal({ ...profile.classTrainer, type: 'Class Trainer' })}
-                        className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl flex items-center justify-center text-white text-xl font-black flex-shrink-0 hover:scale-105 transition-transform cursor-pointer overflow-hidden"
+                        className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl flex items-center justify-center text-white text-xl font-black flex-shrink-0 cursor-pointer overflow-hidden"
                         title="View trainer details"
                       >
                         {profile.classTrainer.image
                           ? <img src={profile.classTrainer.image} alt={profile.classTrainer.name} className="w-full h-full object-cover" />
                           : profile.classTrainer.name?.charAt(0)}
-                      </button>
+                      </motion.button>
                       <div>
                         {profile.classTrainer.trainerId && <div className="text-xs font-mono text-gray-500 mb-0.5">{profile.classTrainer.trainerId}</div>}
                         <button onClick={() => setTrainerModal({ ...profile.classTrainer, type: 'Class Trainer' })} className="text-white font-bold hover:text-purple-300 transition-colors text-left">
@@ -703,23 +806,33 @@ export default function UserDashboard() {
                         {profile.classTrainer.phone && <div className="text-gray-400 text-xs mt-0.5">{profile.classTrainer.phone}</div>}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* WORKOUTS TAB */}
         {activeTab === 'workouts' && (
-          <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-6"
+          >
             <motion.button whileHover={{ scale: 1.03 }} onClick={() => { setCheckinDayName(''); setCheckinForm({ duration: '', workoutType: '', notes: '' }); setCheckinErrors({}); setCheckinModal(true) }} className="btn-primary py-3 px-6 flex items-center gap-2">
               <FaCheckCircle /> Mark Today's Attendance
             </motion.button>
 
             {/* Member workout schedule — always visible */}
             {workoutPlan?.planType === 'member' && workoutPlan?.days?.length > 0 && profile?.membership?.joiningDate && (
-              <div className="space-y-3">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={viewportConfig}
+                className="space-y-3"
+              >
                 <div className="flex items-center justify-between px-1">
                   <div className="flex items-center gap-2">
                     <FaCalendarAlt className="text-primary text-sm" />
@@ -738,24 +851,34 @@ export default function UserDashboard() {
                   </button>
                 </div>
 
-                {workoutPlan.days.map((day, di) => {
-                  const base = new Date(profile.membership.joiningDate)
-                  base.setHours(0, 0, 0, 0)
-                  const dayDate = new Date(base)
-                  dayDate.setDate(base.getDate() + ((day.dayNumber ?? di + 1) - 1))
-                  const today = new Date(); today.setHours(0, 0, 0, 0)
-                  const isToday = dayDate.getTime() === today.getTime()
-                  const isPast = dayDate < today
-                  const isExpanded = expandedDays.has(di)
-                  const dateLabel = dayDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-                  return (
-                    <div key={di} className={`glass-card overflow-hidden transition-all ${isToday ? 'border-primary/50 ring-1 ring-primary/20' : isPast && !isDayAttended(dayDate) ? 'opacity-70' : ''}`}>
-                      {/* Clickable day header */}
-                      <button
-                        type="button"
-                        onClick={() => toggleExpandDay(di)}
-                        className={`w-full flex items-center gap-3 px-5 py-3 text-left transition-colors ${isToday ? 'bg-primary/10 hover:bg-primary/15' : 'bg-dark-300/60 hover:bg-dark-300'} ${isExpanded ? 'border-b border-dark-500' : ''}`}
-                      >
+                <motion.div
+                    variants={staggerContainer}
+                    initial="initial"
+                    animate="animate"
+                    className="space-y-3"
+                  >
+                    {workoutPlan.days.map((day, di) => {
+                      const base = new Date(profile.membership.joiningDate)
+                      base.setHours(0, 0, 0, 0)
+                      const dayDate = new Date(base)
+                      dayDate.setDate(base.getDate() + ((day.dayNumber ?? di + 1) - 1))
+                      const today = new Date(); today.setHours(0, 0, 0, 0)
+                      const isToday = dayDate.getTime() === today.getTime()
+                      const isPast = dayDate < today
+                      const isExpanded = expandedDays.has(di)
+                      const dateLabel = dayDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                      return (
+                        <motion.div
+                          key={di}
+                          variants={staggerItem}
+                          className={`glass-card overflow-hidden transition-all ${isToday ? 'border-primary/50 ring-1 ring-primary/20' : isPast && !isDayAttended(dayDate) ? 'opacity-70' : ''}`}
+                        >
+                          {/* Clickable day header */}
+                          <button
+                            type="button"
+                            onClick={() => toggleExpandDay(di)}
+                            className={`w-full flex items-center gap-3 px-5 py-3 text-left transition-colors ${isToday ? 'bg-primary/10 hover:bg-primary/15' : 'bg-dark-300/60 hover:bg-dark-300'} ${isExpanded ? 'border-b border-dark-500' : ''}`}
+                          >
                         <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 font-mono ${isToday ? 'bg-primary text-white' : 'bg-dark-400 text-gray-400'}`}>
                           Day {day.dayNumber ?? di + 1}
                         </span>
@@ -806,41 +929,63 @@ export default function UserDashboard() {
                           <p className="text-gray-600 text-xs px-5 py-3">Rest day / No exercises listed.</p>
                         )
                       )}
-                    </div>
+                    </motion.div>
                   )
                 })}
-              </div>
+              </motion.div>
             )}
 
             {/* Attendance history */}
             {attendance.length > 0 && (
-              <div className="glass-card p-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={viewportConfig}
+                className="glass-card p-6"
+              >
                 <h3 className="text-white font-bold mb-5 flex items-center gap-2"><FaDumbbell className="text-primary" /> Workout History</h3>
-                <div className="space-y-3">
+                <motion.div
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                  className="space-y-3"
+                >
                   {[...attendance].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 20).map((a, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-dark-300 rounded-xl">
+                    <motion.div
+                      key={i}
+                      variants={staggerItem}
+                      className="flex items-center justify-between p-4 bg-dark-300 rounded-xl whileHover={{ x: 4 }}"
+                    >
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                        <motion.div
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center"
+                        >
                           <FaRunning className="text-primary text-sm" />
-                        </div>
+                        </motion.div>
                         <div>
                           <div className="text-white font-medium text-sm">{a.workoutType || 'Gym Session'}</div>
                           <div className="text-gray-500 text-xs">{new Date(a.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
                         </div>
                       </div>
                       {a.duration && <span className="text-gray-400 text-sm flex items-center gap-1"><FaClock className="text-xs" /> {a.duration} min</span>}
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             )}
 
             {/* Empty state — no plan, no attendance */}
             {!workoutPlan && attendance.length === 0 && (
-              <div className="glass-card p-12 text-center text-gray-500">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={viewportConfig}
+                className="glass-card p-12 text-center text-gray-500"
+              >
                 <FaDumbbell className="text-4xl mx-auto mb-3 opacity-30" />
                 <p>No workout sessions recorded yet.</p>
-              </div>
+              </motion.div>
             )}
             {workoutPlan && workoutPlan.planType !== 'member' && (
               <div className="glass-card p-6">
@@ -853,19 +998,39 @@ export default function UserDashboard() {
                     )}
                   </div>
                   {workoutPlan.planType === 'member' ? (
-                    <div>
-                      <div className="flex flex-wrap gap-4 text-xs text-gray-500 mb-4">
+                    <motion.div
+                      variants={staggerContainer}
+                      initial="initial"
+                      animate="animate"
+                      className="space-y-3"
+                    >
+                      <motion.div
+                        variants={staggerItem}
+                        className="flex flex-wrap gap-4 text-xs text-gray-500 mb-4"
+                      >
                         {workoutPlan.levelNumber && <span>Level: <span className="text-gray-300">{workoutPlan.levelNumber}</span></span>}
                         {workoutPlan.completionWeeks && <span>Duration: <span className="text-gray-300">{workoutPlan.completionWeeks} weeks</span></span>}
                         {workoutPlan.days?.length > 0 && <span>Days: <span className="text-gray-300">{workoutPlan.days.length}</span></span>}
-                      </div>
+                      </motion.div>
                       {workoutPlan.promotionNote && (
-                        <p className="text-gray-500 text-xs mb-4 bg-dark-300 rounded-xl px-3 py-2 border-l-2 border-primary">{workoutPlan.promotionNote}</p>
+                        <motion.div
+                          variants={staggerItem}
+                          className="text-gray-500 text-xs mb-4 bg-dark-300 rounded-xl px-3 py-2 border-l-2 border-primary"
+                        >
+                          {workoutPlan.promotionNote}
+                        </motion.div>
                       )}
                       {workoutPlan.days?.length > 0 && (
-                        <div className="space-y-3">
+                        <motion.div
+                          variants={staggerItem}
+                          className="space-y-3"
+                        >
                           {workoutPlan.days.map((day, di) => (
-                            <div key={di} className="bg-dark-300 rounded-xl overflow-hidden border border-dark-500">
+                            <motion.div
+                              key={di}
+                              variants={staggerItem}
+                              className="bg-dark-300 rounded-xl overflow-hidden border border-dark-500 whileHover={{ x: 4 }}"
+                            >
                               <div className="flex items-center gap-3 px-4 py-2.5 bg-dark-400/50 border-b border-dark-500">
                                 <span className="text-xs text-primary font-semibold">Day {day.dayNumber || di + 1}</span>
                                 <span className="text-white text-sm font-medium flex-1">{day.dayName}</span>
@@ -887,44 +1052,74 @@ export default function UserDashboard() {
                                   ))}
                                 </div>
                               )}
-                            </div>
+                            </motion.div>
                           ))}
-                        </div>
+                        </motion.div>
                       )}
-                    </div>
+                    </motion.div>
                   ) : (
-                    <div>
-                      {workoutPlan.description && <div className="text-gray-400 text-sm mt-1 mb-3">{workoutPlan.description}</div>}
-                      <div className="flex flex-wrap gap-4 text-xs text-gray-500">
+                    <motion.div
+                      variants={staggerContainer}
+                      initial="initial"
+                      animate="animate"
+                      className="space-y-3"
+                    >
+                      {workoutPlan.description && (
+                        <motion.div
+                          variants={staggerItem}
+                          className="text-gray-400 text-sm mt-1 mb-3"
+                        >
+                          {workoutPlan.description}
+                        </motion.div>
+                      )}
+                      <motion.div
+                        variants={staggerItem}
+                        className="flex flex-wrap gap-4 text-xs text-gray-500"
+                      >
                         {workoutPlan.category && <span>Category: <span className="text-gray-300">{workoutPlan.category}</span></span>}
                         {workoutPlan.level && <span>Level: <span className="text-gray-300">{workoutPlan.level}</span></span>}
                         {workoutPlan.duration && <span>Duration: <span className="text-gray-300">{workoutPlan.duration} min</span></span>}
-                      </div>
+                      </motion.div>
                       {workoutPlan.schedule?.length > 0 && (
-                        <div className="mt-4">
+                        <motion.div
+                          variants={staggerItem}
+                          className="mt-4"
+                        >
                           <div className="text-gray-400 text-xs mb-2">Schedule</div>
                           <div className="flex flex-wrap gap-2">
                             {workoutPlan.schedule.map((s, i) => (
-                              <span key={i} className="bg-dark-400 text-gray-300 text-xs px-3 py-1 rounded-full">{s.day} {s.time}</span>
+                              <motion.span
+                                key={i}
+                                whileHover={{ scale: 1.05 }}
+                                className="bg-dark-400 text-gray-300 text-xs px-3 py-1 rounded-full"
+                              >
+                                {s.day} {s.time}
+                              </motion.span>
                             ))}
                           </div>
-                        </div>
+                        </motion.div>
                       )}
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* PROGRESS TAB */}
         {activeTab === 'progress' && (
-          <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-6"
+          >
             <div className="flex items-center justify-between">
               <h2 className="text-white font-bold text-lg">Weight & Progress History</h2>
               <div className="flex items-center gap-2">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
                   onClick={fetchProgress}
                   disabled={progressLoading}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-dark-400 text-gray-400 hover:text-white hover:border-dark-300 text-xs transition-all disabled:opacity-50"
@@ -932,7 +1127,7 @@ export default function UserDashboard() {
                 >
                   <FaSync className={`text-xs ${progressLoading ? 'animate-spin' : ''}`} />
                   Refresh
-                </button>
+                </motion.button>
                 <motion.button whileHover={{ scale: 1.05 }} onClick={() => setWeightModal(true)} className="btn-primary text-sm py-2 px-4 flex items-center gap-2">
                   <FaPlus className="text-xs" /> Log Weight
                 </motion.button>
@@ -940,26 +1135,44 @@ export default function UserDashboard() {
             </div>
 
             {progressError ? (
-              <div className="glass-card p-12 text-center">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="glass-card p-12 text-center"
+              >
                 <FaExclamationTriangle className="text-3xl text-red-400 mx-auto mb-3" />
                 <p className="text-red-400 font-medium mb-1">Failed to load progress data</p>
                 <p className="text-gray-500 text-sm mb-4">Your data is still saved. Click Refresh to try again.</p>
-                <button onClick={fetchProgress} className="btn-primary text-sm py-2 px-6 flex items-center gap-2 mx-auto">
+                <motion.button whileHover={{ scale: 1.02 }} onClick={fetchProgress} className="btn-primary text-sm py-2 px-6 flex items-center gap-2 mx-auto">
                   <FaSync className="text-xs" /> Try Again
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
             ) : progressLoading ? (
-              <div className="glass-card p-12 text-center">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="glass-card p-12 text-center"
+              >
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                 <p className="text-gray-500 text-sm">Loading progress data...</p>
-              </div>
+              </motion.div>
             ) : progress.length === 0 ? (
-              <div className="glass-card p-12 text-center text-gray-500">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={viewportConfig}
+                className="glass-card p-12 text-center text-gray-500"
+              >
                 <FaChartLine className="text-4xl mx-auto mb-3 opacity-30" />
                 <p>No progress logged yet. Start tracking your weight!</p>
-              </div>
+              </motion.div>
             ) : (
-              <div className="glass-card overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={viewportConfig}
+                className="glass-card overflow-hidden"
+              >
                 <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
                   <thead>
@@ -970,30 +1183,36 @@ export default function UserDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {progress.map((p, i) => {
-                      const isEditing = editingProgressId === p._id
-                      return (
-                        <tr key={p._id || i} className="border-b border-dark-400/50 hover:bg-dark-300/50 group">
-                          <td className="py-3 px-4 text-gray-300 text-sm whitespace-nowrap">{new Date(p.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
-                          <td className="py-3 px-4 text-white font-semibold text-sm">{p.weight || '—'}</td>
-                          <td className="py-3 px-4 text-gray-300 text-sm">{p.bodyFat || '—'}</td>
-                          <td className="py-3 px-4 text-gray-300 text-sm">{p.muscleMass || '—'}</td>
-                          <td className="py-3 px-4 text-sm min-w-[180px]">
-                            {isEditing ? (
-                              <div className="flex items-center gap-2">
-                                <input
-                                  autoFocus
-                                  value={editingNotes}
-                                  onChange={(e) => setEditingNotes(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') handleUpdateNotes(p._id)
-                                    if (e.key === 'Escape') cancelEditNotes()
-                                  }}
-                                  className="flex-1 bg-dark-400 border border-primary/50 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:border-primary"
-                                  placeholder="Add notes..."
-                                />
-                                <button
-                                  onClick={() => handleUpdateNotes(p._id)}
+                      {progress.map((p, i) => {
+                        const isEditing = editingProgressId === p._id
+                        return (
+                          <motion.tr
+                            key={p._id || i}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.05 }}
+                            className="border-b border-dark-400/50 hover:bg-dark-300/50 group"
+                          >
+                            <td className="py-3 px-4 text-gray-300 text-sm whitespace-nowrap">{new Date(p.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                            <td className="py-3 px-4 text-white font-semibold text-sm">{p.weight || '—'}</td>
+                            <td className="py-3 px-4 text-gray-300 text-sm">{p.bodyFat || '—'}</td>
+                            <td className="py-3 px-4 text-gray-300 text-sm">{p.muscleMass || '—'}</td>
+                            <td className="py-3 px-4 text-sm min-w-[180px]">
+                              {isEditing ? (
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    autoFocus
+                                    value={editingNotes}
+                                    onChange={(e) => setEditingNotes(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') handleUpdateNotes(p._id)
+                                      if (e.key === 'Escape') cancelEditNotes()
+                                    }}
+                                    className="flex-1 bg-dark-400 border border-primary/50 rounded-lg px-2 py-1 text-white text-xs focus:outline-none focus:border-primary"
+                                    placeholder="Add notes..."
+                                  />
+                                  <button
+                                    onClick={() => handleUpdateNotes(p._id)}
                                   disabled={savingNotes}
                                   className="text-green-400 hover:text-green-300 text-xs disabled:opacity-50 flex-shrink-0"
                                   title="Save"
@@ -1032,28 +1251,44 @@ export default function UserDashboard() {
                               </div>
                             )}
                           </td>
-                        </tr>
+                      </motion.tr>
                       )
                     })}
                   </tbody>
                 </table>
                 </div>
-              </div>
-            )}
-          </div>
+              </motion.div>
         )}
 
         {/* DIET TAB */}
         {activeTab === 'diet' && (
-          <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-6"
+          >
             {!dietPlan ? (
-              <div className="glass-card p-12 text-center text-gray-500">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={viewportConfig}
+                className="glass-card p-12 text-center text-gray-500"
+              >
                 <FaAppleAlt className="text-4xl mx-auto mb-3 opacity-30" />
                 <p>No diet plan assigned yet. Ask your trainer to assign one.</p>
-              </div>
+              </motion.div>
             ) : (
-              <div className="space-y-4">
-                <div className="glass-card p-6">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={viewportConfig}
+                className="space-y-4"
+              >
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  className="glass-card p-6"
+                >
                   <h2 className="text-xl font-black text-white mb-1" style={{ fontFamily: 'Oswald' }}>{dietPlan.title}</h2>
                   <p className="text-primary text-sm mb-3">{dietPlan.goal}</p>
                   {dietPlan.description && <p className="text-gray-400 text-sm mb-4">{dietPlan.description}</p>}
@@ -1070,7 +1305,7 @@ export default function UserDashboard() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </motion.div>
                 {dietPlan.meals?.length > 0 && (() => {
                   const MT = ['Breakfast', 'Mid-Breakfast', 'Lunch', 'Snacks', 'Dinner']
                   const allGroups = MT.map((t) => ({ mealType: t, items: dietPlan.meals.filter((m) => m.time === t) })).filter((g) => g.items.length > 0)
@@ -1083,7 +1318,12 @@ export default function UserDashboard() {
                     calories: acc.calories + (m.calories || 0),
                   }), { fat: 0, carbs: 0, protein: 0, calories: 0 })
                   return (
-                    <div className="glass-card p-6">
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={viewportConfig}
+                      className="glass-card p-6"
+                    >
                       <h3 className="text-white font-bold mb-5">Meal Plan</h3>
                       <div className="overflow-x-auto rounded-xl border border-dark-400">
                         <table className="w-full text-sm border-collapse">
@@ -1099,10 +1339,16 @@ export default function UserDashboard() {
                             </tr>
                           </thead>
                           <tbody>
-                            {allGroups.map((group) => (
-                              <Fragment key={group.mealType}>
-                                {group.items.map((item, ii) => (
-                                  <tr key={ii} className="border-b border-dark-500 hover:bg-dark-300/40 transition-colors">
+                              {allGroups.map((group) => (
+                                <Fragment key={group.mealType}>
+                                  {group.items.map((item, ii) => (
+                                    <motion.tr
+                                      key={ii}
+                                      initial={{ opacity: 0, y: 10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: ii * 0.05 }}
+                                      className="border-b border-dark-500 hover:bg-dark-300/40 transition-colors"
+                                    >
                                     {ii === 0 && (
                                       <td
                                         rowSpan={group.items.length}
@@ -1117,32 +1363,40 @@ export default function UserDashboard() {
                                     <td className="px-4 py-2.5 text-center text-green-400">{item.carbs > 0 ? Number(item.carbs).toFixed(2) : '—'}</td>
                                     <td className="px-4 py-2.5 text-center text-blue-400">{item.protein > 0 ? Number(item.protein).toFixed(2) : '—'}</td>
                                     <td className="px-4 py-2.5 text-center text-orange-400">{item.calories > 0 ? Number(item.calories).toFixed(2) : '—'}</td>
-                                  </tr>
+                                  </motion.tr>
                                 ))}
                               </Fragment>
                             ))}
-                            <tr className="bg-dark-300 font-bold text-sm border-t-2 border-primary/40">
+                            <motion.tr
+                              className="bg-dark-300 font-bold text-sm border-t-2 border-primary/40"
+                              whileHover={{ x: 4 }}
+                            >
                               <td className="px-4 py-3 text-primary font-black">Total</td>
                               <td className="px-4 py-3 text-gray-400 text-xs" colSpan={2}>{allGroups.flatMap((g) => g.items).length} food items</td>
                               <td className="px-4 py-3 text-center text-yellow-400">{totals.fat > 0 ? totals.fat.toFixed(2) : '—'}</td>
                               <td className="px-4 py-3 text-center text-green-400">{totals.carbs > 0 ? totals.carbs.toFixed(2) : '—'}</td>
                               <td className="px-4 py-3 text-center text-blue-400">{totals.protein > 0 ? totals.protein.toFixed(2) : '—'}</td>
                               <td className="px-4 py-3 text-center text-orange-400">{totals.calories > 0 ? totals.calories.toFixed(2) : '—'}</td>
-                            </tr>
-                          </tbody>
+                            </motion.tr>
+                            </tbody>
                         </table>
                       </div>
-                    </div>
+                    </motion.div>
                   )
                 })()}
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* ACTIVITIES TAB */}
         {activeTab === 'activities' && (
-          <div className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-4"
+          >
             <div className="flex items-center justify-between mb-2">
               <div>
                 <h2 className="text-xl font-black text-white" style={{ fontFamily: 'Oswald' }}>UPCOMING ACTIVITIES</h2>
@@ -1151,12 +1405,22 @@ export default function UserDashboard() {
             </div>
 
             {activities.length === 0 ? (
-              <div className="glass-card p-12 text-center">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={viewportConfig}
+                className="glass-card p-12 text-center"
+              >
                 <FaCalendarAlt className="text-4xl text-gray-600 mx-auto mb-3" />
                 <p className="text-gray-400">No upcoming activities at the moment.</p>
-              </div>
+              </motion.div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <motion.div
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
                 {activities.map((a, i) => {
                   const myId = (profile?._id || user?.id)?.toString()
                   const isRegistered = a.registeredUsers?.some((u) => (u._id || u).toString() === myId)
@@ -1168,10 +1432,8 @@ export default function UserDashboard() {
                   return (
                     <motion.div
                       key={a._id}
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      className={`glass-card p-5 ${isRegistered ? 'border-primary/30 ring-1 ring-primary/10' : ''}`}
+                      variants={staggerItem}
+                      className={`glass-card p-5 ${isRegistered ? 'border-primary/30 ring-1 ring-primary/10' : ''} whileHover={{ y: -4 }}`}
                     >
                       <div className="flex items-start justify-between gap-3 mb-3">
                         <div>
@@ -1211,7 +1473,7 @@ export default function UserDashboard() {
                       {a.description && (
                         <div
                           className="text-gray-500 text-xs mb-3 [&_strong]:font-bold [&_strong]:text-gray-300 [&_em]:italic [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:space-y-0.5 [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:space-y-0.5 [&_mark]:rounded [&_mark]:px-0.5"
-                          dangerouslySetInnerHTML={{ __html: a.description }}
+                          dangerouslySetInnerHTML={{ __html: a.description.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').replace(/on\w+="[^"]*"/gi, '').replace(/on\w+='[^']*'/gi, '') }}
                         />
                       )}
 
@@ -1244,28 +1506,46 @@ export default function UserDashboard() {
                     </motion.div>
                   )
                 })}
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         )}
 
         {/* PROFILE TAB */}
         {activeTab === 'profile' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+          >
 
             {/* LEFT — Profile Info */}
-            <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={viewportConfig}
+              className="space-y-4"
+            >
               {/* Profile Header Card */}
-              <div className="glass-card p-6">
+              <motion.div
+                whileHover={{ y: -4 }}
+                className="glass-card p-6"
+              >
                 <div className="flex items-center gap-5">
                   <label className="relative flex-shrink-0 cursor-pointer group" title="Change photo">
-                    {profile?.avatar ? (
-                      <img src={profile.avatar} alt={profile.name} className="w-20 h-20 rounded-2xl object-cover shadow-lg shadow-primary/20" />
-                    ) : (
-                      <div className="w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-primary/20">
-                        {user?.name?.charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      className="w-20 h-20 rounded-2xl overflow-hidden"
+                    >
+                      {profile?.avatar ? (
+                        <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover shadow-lg shadow-primary/20" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-3xl font-black shadow-lg shadow-primary/20">
+                          {user?.name?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </motion.div>
                     <div className="absolute inset-0 rounded-2xl bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       {avatarUploading ? (
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1275,14 +1555,27 @@ export default function UserDashboard() {
                     </div>
                     <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={avatarUploading} />
                   </label>
-                  <div className="flex-1 min-w-0">
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex-1 min-w-0"
+                  >
                     <h2 className="text-xl font-black text-white" style={{ fontFamily: 'Oswald' }}>{profile?.name}</h2>
                     <p className="text-gray-400 text-sm">{profile?.email}</p>
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <motion.div
+                      variants={staggerContainer}
+                      initial="initial"
+                      animate="animate"
+                      className="flex flex-wrap gap-2 mt-2"
+                    >
                       {profile?.regNo && (
-                        <span className="text-xs px-2.5 py-1 rounded-lg bg-primary/10 text-primary font-mono font-semibold border border-primary/20">
+                        <motion.div
+                          variants={staggerItem}
+                          className="text-xs px-2.5 py-1 rounded-lg bg-primary/10 text-primary font-mono font-semibold border border-primary/20"
+                        >
                           #{profile.regNo}
-                        </span>
+                        </motion.div>
                       )}
                       {profile?.membership?.status && (
                         <span className={`text-xs px-2.5 py-1 rounded-lg font-medium capitalize ${
@@ -1296,8 +1589,8 @@ export default function UserDashboard() {
                       {profile?.goal && (
                         <span className="text-xs px-2.5 py-1 rounded-lg bg-dark-400 text-gray-300 border border-dark-500">{profile.goal}</span>
                       )}
-                    </div>
-                  </div>
+                    </motion.div>
+                  </motion.div>
                   {(profile?.socialLinks?.instagram || profile?.socialLinks?.facebook || profile?.socialLinks?.twitter || profile?.socialLinks?.linkedin) && (
                     <div className="flex gap-2 mt-4 pt-4 border-t border-dark-400">
                       {profile.socialLinks?.instagram && (
@@ -1323,7 +1616,7 @@ export default function UserDashboard() {
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
 
               {/* Info Tiles */}
               <div className="glass-card p-5">
@@ -1355,89 +1648,148 @@ export default function UserDashboard() {
                   ))}
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* RIGHT — Edit Form */}
-            <div className="glass-card p-6 h-fit">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={viewportConfig}
+              className="glass-card p-6 h-fit"
+            >
               <h3 className="text-white font-bold mb-5 text-sm flex items-center gap-2">
                 <FaCheckCircle className="text-primary text-xs" /> Edit Information
               </h3>
               <form onSubmit={handleProfileSave} className="space-y-4" noValidate>
-                <div>
-                  <label className="text-gray-400 text-xs mb-1 block">Full Name</label>
-                  <input value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} className={fieldClass(profileErrors, 'name', 'input-field')} />
-                  <Err msg={profileErrors.name} />
-                </div>
-                <div>
-                  <label className="text-gray-400 text-xs mb-1 block">Email</label>
-                  <input value={profile?.email || ''} className="input-field opacity-40 cursor-not-allowed" readOnly />
-                </div>
-                <div>
-                  <label className="text-gray-400 text-xs mb-1 block">Phone</label>
-                  <PhoneInput
-                    value={profileForm.phone}
-                    onChange={(v) => setProfileForm({ ...profileForm, phone: v })}
-                    onBlur={() => {
-                      const err = phone()(profileForm.phone)
-                      if (err) setProfileErrors((p) => ({ ...p, phone: err }))
-                      else setProfileErrors((p) => { const n = { ...p }; delete n.phone; return n })
-                    }}
-                    error={profileErrors.phone}
-                  />
-                  <Err msg={profileErrors.phone} />
-                </div>
-                <div>
-                  <label className="text-gray-400 text-xs mb-1 block">Fitness Goal</label>
-                  <select value={profileForm.goal} onChange={(e) => setProfileForm({ ...profileForm, goal: e.target.value })} className="input-field">
-                    <option value="">Select goal</option>
-                    <option>Lose Weight</option>
-                    <option>Build Muscle</option>
-                    <option>Improve Fitness</option>
-                    <option>Athletic Training</option>
-                    <option>General Health</option>
-                  </select>
-                </div>
-                {profile?.branch && (
-                  <div>
-                    <label className="text-gray-400 text-xs mb-1 block">Branch</label>
-                    <input value={profile.branch.name || ''} className="input-field opacity-40 cursor-not-allowed" readOnly />
-                    <p className="text-gray-600 text-xs mt-1">Contact admin to change branch(Transfer Fee included)</p>
-                  </div>
-                )}
+                <motion.div
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                >
+                  <motion.div
+                    variants={staggerItem}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    <label className="text-gray-400 text-xs mb-1 block">Full Name</label>
+                    <input value={profileForm.name} onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })} className={fieldClass(profileErrors, 'name', 'input-field')} />
+                    <Err msg={profileErrors.name} />
+                  </motion.div>
+                  <motion.div
+                    variants={staggerItem}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.05 }}
+                  >
+                    <label className="text-gray-400 text-xs mb-1 block">Email</label>
+                    <input value={profile?.email || ''} className="input-field opacity-40 cursor-not-allowed" readOnly />
+                  </motion.div>
+                  <motion.div
+                    variants={staggerItem}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                  >
+                    <label className="text-gray-400 text-xs mb-1 block">Phone</label>
+                    <PhoneInput
+                      value={profileForm.phone}
+                      onChange={(v) => setProfileForm({ ...profileForm, phone: v })}
+                      onBlur={() => {
+                        const err = phone()(profileForm.phone)
+                        if (err) setProfileErrors((p) => ({ ...p, phone: err }))
+                        else setProfileErrors((p) => { const n = { ...p }; delete n.phone; return n })
+                      }}
+                      error={profileErrors.phone}
+                    />
+                    <Err msg={profileErrors.phone} />
+                  </motion.div>
+                  <motion.div
+                    variants={staggerItem}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.15 }}
+                  >
+                    <label className="text-gray-400 text-xs mb-1 block">Fitness Goal</label>
+                    <select value={profileForm.goal} onChange={(e) => setProfileForm({ ...profileForm, goal: e.target.value })} className="input-field">
+                      <option value="">Select goal</option>
+                      <option>Lose Weight</option>
+                      <option>Build Muscle</option>
+                      <option>Improve Fitness</option>
+                      <option>Athletic Training</option>
+                      <option>General Health</option>
+                    </select>
+                  </motion.div>
+                  {profile?.branch && (
+                    <motion.div
+                      variants={staggerItem}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: 0.2 }}
+                    >
+                      <label className="text-gray-400 text-xs mb-1 block">Branch</label>
+                      <input value={profile.branch.name || ''} className="input-field opacity-40 cursor-not-allowed" readOnly />
+                      <p className="text-gray-600 text-xs mt-1">Contact admin to change branch(Transfer Fee included)</p>
+                    </motion.div>
+                  )}
 
-                {/* Social Links */}
-                <div>
-                  <label className="text-gray-400 text-xs mb-2 block font-medium">Social Media Links</label>
-                  <div className="space-y-2">
-                    {[
-                      { key: 'instagram', icon: FaInstagram, color: 'text-pink-400', placeholder: 'https://instagram.com/username' },
-                      { key: 'facebook', icon: FaFacebook, color: 'text-blue-400', placeholder: 'https://facebook.com/username' },
-                      { key: 'twitter', icon: FaTwitter, color: 'text-sky-400', placeholder: 'https://twitter.com/username' },
-                      { key: 'linkedin', icon: FaLinkedin, color: 'text-blue-500', placeholder: 'https://linkedin.com/in/username' },
-                    ].map(({ key, icon: Icon, color, placeholder }) => (
-                      <div key={key} className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-dark-400 rounded-lg flex items-center justify-center flex-shrink-0 border border-dark-500">
-                          <Icon className={`text-sm ${color}`} />
-                        </div>
-                        <input
-                          value={profileForm.socialLinks?.[key] || ''}
-                          onChange={(e) => setProfileForm((p) => ({ ...p, socialLinks: { ...p.socialLinks, [key]: e.target.value } }))}
-                          className="input-field text-sm flex-1"
-                          placeholder={placeholder}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  {/* Social Links */}
+                  <motion.div
+                    variants={staggerItem}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.25 }}
+                  >
+                    <label className="text-gray-400 text-xs mb-2 block font-medium">Social Media Links</label>
+                    <motion.div
+                      variants={staggerContainer}
+                      initial="initial"
+                      animate="animate"
+                      className="space-y-2"
+                    >
+                      {[
+                        { key: 'instagram', icon: FaInstagram, color: 'text-pink-400', placeholder: 'https://instagram.com/username' },
+                        { key: 'facebook', icon: FaFacebook, color: 'text-blue-400', placeholder: 'https://facebook.com/username' },
+                        { key: 'twitter', icon: FaTwitter, color: 'text-sky-400', placeholder: 'https://twitter.com/username' },
+                        { key: 'linkedin', icon: FaLinkedin, color: 'text-blue-500', placeholder: 'https://linkedin.com/in/username' },
+                      ].map(({ key, icon: Icon, color, placeholder }, idx) => (
+                        <motion.div
+                          key={key}
+                          variants={staggerItem}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: idx * 0.05 }}
+                          className="flex items-center gap-2"
+                        >
+                          <div className="w-8 h-8 bg-dark-400 rounded-lg flex items-center justify-center flex-shrink-0 border border-dark-500">
+                            <Icon className={`text-sm ${color}`} />
+                          </div>
+                          <input
+                            value={profileForm.socialLinks?.[key] || ''}
+                            onChange={(e) => setProfileForm((p) => ({ ...p, socialLinks: { ...p.socialLinks, [key]: e.target.value } }))}
+                            className="input-field text-sm flex-1"
+                            placeholder={placeholder}
+                          />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  </motion.div>
 
-                <motion.button type="submit" disabled={saving} whileHover={{ scale: 1.02 }} className="btn-primary py-3 w-full disabled:opacity-60">
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </motion.button>
+                  <motion.div
+                    variants={staggerItem}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.35 }}
+                  >
+                    <motion.button type="submit" disabled={saving} whileHover={{ scale: 1.02 }} className="btn-primary py-3 w-full disabled:opacity-60">
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </motion.button>
+                  </motion.div>
+                </motion.div>
               </form>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
-      </div>
 
       {/* Check-in Modal */}
       <AnimatePresence>
@@ -1686,7 +2038,6 @@ export default function UserDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
-      </div>
-    </div>
+    </motion.div>
   )
 }

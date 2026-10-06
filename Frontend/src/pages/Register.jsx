@@ -9,6 +9,7 @@ import { validate, required, email, minLen, maxLen, phone, noNumbers, passwordSt
 import PhoneInput from '../components/shared/PhoneInput'
 import LegalModal from '../components/shared/LegalModal'
 import { useSiteContent } from '../context/SiteContentContext'
+import { fadeInUp, floatAnimation, floatAnimationSlow, buttonSpring, staggerContainer, staggerItem, viewportConfig } from '../utils/animations'
 
 const REGISTER_DEFAULTS = {
   bgImage: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=1920&q=80',
@@ -100,38 +101,74 @@ export default function Register() {
           <img src={c.bgImage} alt="" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-br from-dark/95 via-dark/85 to-secondary/20" />
         </div>
-        <div className="relative z-10">
+
+        {/* Decorative floating elements */}
+        <motion.div animate={floatAnimation.animate} className="absolute top-20 left-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <motion.div animate={floatAnimationSlow.animate} className="absolute bottom-20 right-10 w-48 h-48 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
+
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="relative z-10"
+        >
           <Link to="/" className="inline-flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center"
+            >
               <FaDumbbell className="text-white text-base" />
-            </div>
+            </motion.div>
             <span className="text-xl font-black text-white" style={{ fontFamily: 'Oswald' }}>
               POWER<span className="text-primary">ZONE</span>
             </span>
           </Link>
-        </div>
-        <div className="relative z-10 space-y-8">
-          <div>
+        </motion.div>
+
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          viewport={viewportConfig}
+          className="relative z-10 space-y-8"
+        >
+          <motion.div variants={staggerItem}>
             <h1 className="text-4xl font-black text-white leading-tight" style={{ fontFamily: 'Oswald' }}>
               {c.headline1}<br /><span className="text-primary">{c.headline2}</span><br />{c.headline3}
             </h1>
             <p className="text-gray-300 mt-3 text-sm leading-relaxed">{c.subtitle}</p>
-          </div>
-          <div className="space-y-4">
-            {perks.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex items-start gap-3">
-                <div className="w-9 h-9 bg-primary/15 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Icon className="text-primary text-sm" />
-                </div>
-                <div>
-                  <div className="text-white text-sm font-semibold">{title}</div>
-                  <div className="text-gray-400 text-xs">{desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="relative z-10">
+          </motion.div>
+
+          <motion.div variants={staggerItem}>
+            <div className="space-y-4">
+              {perks.map(({ icon: Icon, title, desc }, index) => (
+                <motion.div
+                  key={title}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  className="flex items-start gap-3"
+                >
+                  <div className="w-9 h-9 bg-primary/15 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Icon className="text-primary text-sm" />
+                  </div>
+                  <div>
+                    <div className="text-white text-sm font-semibold">{title}</div>
+                    <div className="text-gray-400 text-xs">{desc}</div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+          className="relative z-10"
+        >
           <div className="flex items-center gap-3">
             <div className="flex -space-x-2">
               {['A', 'B', 'C', 'D'].map((l) => (
@@ -140,128 +177,188 @@ export default function Register() {
             </div>
             <p className="text-gray-400 text-xs">{c.memberCount}</p>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* RIGHT PANEL */}
-      <div className="flex-1 flex flex-col justify-center bg-dark overflow-y-auto">
-        <div className="lg:hidden px-8 pt-8 pb-2">
+      <div className="flex-1 flex flex-col justify-center bg-dark relative overflow-y-auto">
+        {/* Decorative floating elements for form side */}
+        <motion.div animate={floatAnimation.animate} className="absolute top-20 right-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <motion.div animate={floatAnimationSlow.animate} className="absolute bottom-20 left-10 w-48 h-48 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
+
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="lg:hidden px-8 pt-8 pb-2"
+        >
           <Link to="/" className="inline-flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center">
+            <motion.div
+              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center"
+            >
               <FaDumbbell className="text-white text-sm" />
-            </div>
+            </motion.div>
             <span className="text-lg font-black text-white" style={{ fontFamily: 'Oswald' }}>
               POWER<span className="text-primary">ZONE</span>
             </span>
           </Link>
-        </div>
+        </motion.div>
 
-        <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }}
-          className="px-8 md:px-14 py-8 max-w-lg mx-auto w-full">
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="px-8 md:px-14 py-8 max-w-lg mx-auto w-full"
+        >
           <div className="mb-6">
             <h2 className="text-3xl font-black text-white" style={{ fontFamily: 'Oswald' }}>{c.formTitle}</h2>
             <p className="text-gray-400 mt-1 text-sm">{c.formSubtitle}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2 sm:col-span-1">
-                <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Full Name <span className="text-red-400">*</span></label>
-                <div className="relative">
-                  <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
-                  <input value={form.name} onChange={(e) => handleChange('name', e.target.value)} onBlur={() => handleBlur('name')} placeholder="John Smith" className={fc('name', 'pl-11')} />
-                </div>
-                <Err msg={errors.name} />
-              </div>
-              <div className="col-span-2 sm:col-span-1">
-                <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Email <span className="text-red-400">*</span></label>
-                <div className="relative">
-                  <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
-                  <input type="email" value={form.email} onChange={(e) => handleChange('email', e.target.value)} onBlur={() => handleBlur('email')} placeholder="your@email.com" className={fc('email', 'pl-11')} />
-                </div>
-                <Err msg={errors.email} />
-              </div>
-            </div>
-
-            <div>
-              <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Phone Number</label>
-              <PhoneInput value={form.phone} onChange={(v) => handleChange('phone', v)} onBlur={() => handleBlur('phone')} error={errors.phone} />
-              <Err msg={errors.phone} />
-            </div>
-
-            <div>
-              <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Fitness Goal</label>
-              <select value={form.goal} onChange={(e) => handleChange('goal', e.target.value)} className="input-field">
-                <option value="">Select your goal</option>
-                <option>Lose Weight</option>
-                <option>Build Muscle</option>
-                <option>Improve Fitness</option>
-                <option>Athletic Training</option>
-                <option>General Health</option>
-              </select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Password <span className="text-red-400">*</span></label>
-                <div className="relative">
-                  <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
-                  <input type={showPass ? 'text' : 'password'} value={form.password} onChange={(e) => handleChange('password', e.target.value)} onBlur={() => handleBlur('password')} placeholder="Min. 6 chars" className={fc('password', 'pl-11 pr-10')} />
-                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
-                    {showPass ? <FaEyeSlash className="text-sm" /> : <FaEye className="text-sm" />}
-                  </button>
-                </div>
-                <Err msg={errors.password} />
-              </div>
-              <div>
-                <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Confirm <span className="text-red-400">*</span></label>
-                <div className="relative">
-                  <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
-                  <input type="password" value={form.confirm} onChange={(e) => handleChange('confirm', e.target.value)} onBlur={() => handleBlur('confirm')} placeholder="Repeat password" className={fc('confirm', 'pl-11')} />
-                </div>
-                <Err msg={errors.confirm} />
-              </div>
-            </div>
-
-            {/* Terms checkbox */}
-            <div>
-              <label className={`flex items-start gap-3 cursor-pointer group ${agreedErr ? 'opacity-100' : ''}`}>
-                <div className="relative mt-0.5 flex-shrink-0" onClick={() => { setAgreed(!agreed); setAgreedErr(false) }}>
-                  <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
-                    agreed ? 'bg-primary border-primary' : agreedErr ? 'border-red-400 bg-red-500/10' : 'border-dark-500 bg-dark-300 group-hover:border-primary/50'
-                  }`}>
-                    {agreed && (
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
+            <motion.div
+              variants={staggerContainer}
+              initial="initial"
+              animate="animate"
+              viewport={viewportConfig}
+            >
+              <motion.div
+                variants={staggerItem}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="grid grid-cols-2 gap-4"
+              >
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Full Name <span className="text-red-400">*</span></label>
+                  <div className="relative">
+                    <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
+                    <input value={form.name} onChange={(e) => handleChange('name', e.target.value)} onBlur={() => handleBlur('name')} placeholder="John Smith" className={fc('name', 'pl-11')} />
                   </div>
+                  <Err msg={errors.name} />
                 </div>
-                <p className="text-gray-400 text-xs leading-relaxed">
-                  I agree to the{' '}
-                  <button type="button" onClick={(e) => { e.stopPropagation(); setLegalModal('terms') }}
-                    className="text-primary hover:text-primary-light hover:underline font-medium transition-colors">
-                    Terms of Service
-                  </button>
-                  {' '}and{' '}
-                  <button type="button" onClick={(e) => { e.stopPropagation(); setLegalModal('privacy') }}
-                    className="text-primary hover:text-primary-light hover:underline font-medium transition-colors">
-                    Privacy Policy
-                  </button>
-                </p>
-              </label>
-              {agreedErr && <p className="text-red-400 text-xs mt-1">You must agree to the Terms &amp; Privacy Policy to continue.</p>}
-            </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Email <span className="text-red-400">*</span></label>
+                  <div className="relative">
+                    <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
+                    <input type="email" value={form.email} onChange={(e) => handleChange('email', e.target.value)} onBlur={() => handleBlur('email')} placeholder="your@email.com" className={fc('email', 'pl-11')} />
+                  </div>
+                  <Err msg={errors.email} />
+                </div>
+              </motion.div>
 
-            <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              className="w-full btn-primary py-3.5 text-sm disabled:opacity-60">
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Creating Account...
-                </span>
-              ) : 'Create Account — Free Trial'}
-            </motion.button>
+              <motion.div
+                variants={staggerItem}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+              >
+                <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Phone Number</label>
+                <PhoneInput value={form.phone} onChange={(v) => handleChange('phone', v)} onBlur={() => handleBlur('phone')} error={errors.phone} />
+                <Err msg={errors.phone} />
+              </motion.div>
+
+              <motion.div
+                variants={staggerItem}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+              >
+                <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Fitness Goal</label>
+                <select value={form.goal} onChange={(e) => handleChange('goal', e.target.value)} className="input-field">
+                  <option value="">Select your goal</option>
+                  <option>Lose Weight</option>
+                  <option>Build Muscle</option>
+                  <option>Improve Fitness</option>
+                  <option>Athletic Training</option>
+                  <option>General Health</option>
+                </select>
+              </motion.div>
+
+              <motion.div
+                variants={staggerItem}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="grid grid-cols-2 gap-4"
+              >
+                <div>
+                  <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Password <span className="text-red-400">*</span></label>
+                  <div className="relative">
+                    <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
+                    <input type={showPass ? 'text' : 'password'} value={form.password} onChange={(e) => handleChange('password', e.target.value)} onBlur={() => handleBlur('password')} placeholder="Min. 6 chars" className={fc('password', 'pl-11 pr-10')} />
+                    <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+                      {showPass ? <FaEyeSlash className="text-sm" /> : <FaEye className="text-sm" />}
+                    </button>
+                  </div>
+                  <Err msg={errors.password} />
+                </div>
+                <div>
+                  <label className="text-gray-400 text-xs font-medium mb-1.5 block uppercase tracking-wider">Confirm <span className="text-red-400">*</span></label>
+                  <div className="relative">
+                    <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm" />
+                    <input type="password" value={form.confirm} onChange={(e) => handleChange('confirm', e.target.value)} onBlur={() => handleBlur('confirm')} placeholder="Repeat password" className={fc('confirm', 'pl-11')} />
+                  </div>
+                  <Err msg={errors.confirm} />
+                </div>
+              </motion.div>
+
+              {/* Terms checkbox */}
+              <motion.div
+                variants={staggerItem}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.25 }}
+              >
+                <div>
+                  <label className={`flex items-start gap-3 cursor-pointer group ${agreedErr ? 'opacity-100' : ''}`}>
+                    <div className="relative mt-0.5 flex-shrink-0" onClick={() => { setAgreed(!agreed); setAgreedErr(false) }}>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                        agreed ? 'bg-primary border-primary' : agreedErr ? 'border-red-400 bg-red-500/10' : 'border-dark-500 bg-dark-300 group-hover:border-primary/50'
+                      }`}>
+                        {agreed && (
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-gray-400 text-xs leading-relaxed">
+                      I agree to the{' '}
+                      <button type="button" onClick={(e) => { e.stopPropagation(); setLegalModal('terms') }}
+                        className="text-primary hover:text-primary-light hover:underline font-medium transition-colors">
+                        Terms of Service
+                      </button>
+                      {' '}and{' '}
+                      <button type="button" onClick={(e) => { e.stopPropagation(); setLegalModal('privacy') }}
+                        className="text-primary hover:text-primary-light hover:underline font-medium transition-colors">
+                        Privacy Policy
+                      </button>
+                    </p>
+                  </label>
+                  {agreedErr && <p className="text-red-400 text-xs mt-1">You must agree to the Terms & Privacy Policy to continue.</p>}
+                </div>
+              </motion.div>
+
+              <motion.div
+                variants={staggerItem}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
+                <motion.button type="submit" disabled={loading} {...buttonSpring}
+                  className="w-full btn-primary py-3.5 text-sm disabled:opacity-60">
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Creating Account...
+                    </span>
+                  ) : 'Create Account — Free Trial'}
+                </motion.button>
+              </motion.div>
+            </motion.div>
           </form>
 
           <div className="mt-5 text-center">
